@@ -1,22 +1,30 @@
-# Environment variables
+# Variáveis de ambiente locais
 .env
 .env.local
 .env.*.local
 
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# React Native build
-.gradle/
+# Flutter e Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
 build/
-/android/app/debug/
-/android/app/release/
-/ios/Pods/
+coverage/
+*.iml
 
-# IDE and Editor
+# Android (gerado pelo Gradle)
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# IDE e editor
 .vscode/
 .idea/
 *.swp
@@ -25,32 +33,9 @@ build/
 *.user
 *.suo
 
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# Testing
-coverage/
-.nyc_output/
-test-results/
-e2e-tests/
-
-# Detox
-artifacts/
-*.log
-
-# OS
+# Sistema
 .DS_Store
 Thumbs.db
 
-# Watchman
-watchman-state.json
-
-# ESLint cache
-.eslintcache
-
-# IDE
-.idea/
-*.swp
+# Logs
+*.log

@@ -1,0 +1,8 @@
+import 'package:flutter/material.dart';
+
+import 'app/app_config.dart';
+import 'app/katch_app.dart';
+
+void main() {
+  runApp(KatchApp(config: AppConfig.fromEnvironment()));
+}

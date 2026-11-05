@@ -1,0 +1,16 @@
+# Dart analyzer com flutter_lints (QG-05; convenções de código e quality gates, secção 5). Na pipeline, o
+# flutter analyze corre com --fatal-infos e --fatal-warnings: qualquer ocorrência bloqueia a integração.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+  language:
+    strict-casts: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - always_declare_return_types
+    - prefer_single_quotes
