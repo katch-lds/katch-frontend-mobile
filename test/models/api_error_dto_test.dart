@@ -6,7 +6,10 @@ void main() {
     final dto = ApiErrorDto.tryParse({
       'code': 'ERR-31',
       'message': 'Quota esgotada.',
-      'fields': [{'field': 'email', 'reason': 'Já registado.'}, 'inválido'],
+      'fields': [
+        {'field': 'email', 'reason': 'Já registado.'},
+        'inválido',
+      ],
       'blockedUntil': '2026-11-05T12:00:00Z',
     });
 
