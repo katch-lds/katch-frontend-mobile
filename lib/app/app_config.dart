@@ -1,3 +1,5 @@
+import '../core/url.dart';
+
 /// Configuração por ambiente da aplicação (I120), sem segredos.
 ///
 /// O endereço da API vem de `--dart-define=API_BASE_URL=...` no build. Por
@@ -23,6 +25,6 @@ class AppConfig {
   /// Retira as barras finais; sem valor, usa a API local do emulador.
   static String trimSlash(String url) {
     final value = url.isEmpty ? _fallback : url;
-    return value.replaceAll(RegExp(r'/+$'), '');
+    return trimTrailingSlashes(value);
   }
 }

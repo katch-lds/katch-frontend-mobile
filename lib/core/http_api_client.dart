@@ -8,6 +8,7 @@ import 'api_client.dart';
 import 'api_exception.dart';
 import 'connection_monitor.dart';
 import 'credential_provider.dart';
+import 'url.dart';
 
 /// Cliente da API v02 sobre HTTPS e JSON (modelo de classes, secção 4.1).
 class HttpApiClient implements ApiClient {
@@ -17,7 +18,7 @@ class HttpApiClient implements ApiClient {
     required CredentialProvider credentials,
     required ConnectionMonitor monitor,
     http.Client? client,
-  }) : _baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), ''),
+  }) : _baseUrl = trimTrailingSlashes(baseUrl),
        _requestTimeout = requestTimeout,
        _credentials = credentials,
        _monitor = monitor,
