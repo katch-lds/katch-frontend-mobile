@@ -1,0 +1,111 @@
+name: CI
+
+# Pipeline CI do frontend mobile (I120), no modelo da pipeline do backend (I066): QG-01 (flutter build), QG-05
+# (dart format e Dart analyzer com flutter_lints, com infos e avisos tratados como erro) e a cobertura mínima de 40%
+# das linhas dos testes unitários e de widget (flutter test). O passo do QG-07 (integration_test) fica preparado e
+# corre logo que exista um teste em integration_test/.
+# O QG-05 do mobile não inclui o SonarQube: o SonarQube Community Build não analisa Dart, e o grupo decidiu em
+# 2026-11-05 (I120) usar o Dart analyzer e o dart format como QG-05 do mobile, a registar como limitação.
+# Corre em cada Merge Request para a main e em cada push na main; a regra de proteção da main exige os dois jobs com
+# sucesso antes do merge.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Cobertura mínima de linhas do frontend mobile (convenções de código e quality gates, secção 6).
+  COVERAGE_THRESHOLD: "40"
+  # Endereço da API usado no build; vem das variáveis do repositório (sem segredos), se existir.
+  API_BASE_URL: ${{ vars.API_BASE_URL }}
+
+jobs:
+  build-and-test:
+    name: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Versões
+        run: flutter --version
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Testes unitários e de widget, com cobertura
+        run: flutter test --coverage
+
+      - name: Cobertura de linhas ≥ 40%
+        run: |
+          read -r found hit < <(awk -F: '/^LF:/{f+=$2} /^LH:/{h+=$2} END{print f+0, h+0}' coverage/lcov.info)
+          pct="$(awk -v f="$found" -v h="$hit" 'BEGIN{ if (f == 0) print "0.0"; else printf "%.1f", 100*h/f }')"
+          echo "Cobertura de linhas: ${pct}% (${hit} de ${found}; mínimo ${COVERAGE_THRESHOLD}%)"
+          {
+            echo "## Testes unitários e de widget (flutter test)"
+            echo
+            echo "Cobertura de linhas: **${pct}%** (${hit} de ${found} linhas; mínimo: ${COVERAGE_THRESHOLD}%)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if awk -v p="$pct" -v t="$COVERAGE_THRESHOLD" 'BEGIN{ exit !(p < t) }'; then
+            echo "::error title=Cobertura insuficiente::Cobertura de linhas de ${pct}%, abaixo do mínimo de ${COVERAGE_THRESHOLD}%."
+            exit 1
+          fi
+
+      - name: Publicar relatório de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+          if-no-files-found: ignore
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: QG-01 Build (APK de depuração)
+        run: flutter build apk --debug --dart-define=API_BASE_URL="${API_BASE_URL}"
+
+      - name: QG-07 Testes de sistema (integration_test)
+        if: hashFiles('integration_test/**/*_test.dart') != ''
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          script: flutter test integration_test
+
+  static-analysis:
+    name: static-analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: QG-05 Formatação (dart format)
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: QG-05 Análise estática (Dart analyzer com flutter_lints)
+        run: flutter analyze --fatal-infos --fatal-warnings
