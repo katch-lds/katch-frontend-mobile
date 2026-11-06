@@ -73,12 +73,6 @@ jobs:
           path: coverage
           if-no-files-found: ignore
 
-      # O repositório ainda não tem a pasta android/ (gerada pelo flutter create). Enquanto não existir, é gerada
-      # aqui, sem alterar os ficheiros já existentes, e publicada como artefacto para ser integrada no repositório.
-      - name: Gerar a plataforma Android, se não existir
-        if: hashFiles('android/build.gradle', 'android/build.gradle.kts') == ''
-        run: flutter create --platforms=android --org pt.ipp.estg.katch --project-name katch_mobile .
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -86,17 +80,6 @@ jobs:
 
       - name: QG-01 Build (APK de depuração)
         run: flutter build apk --debug --dart-define=API_BASE_URL="${API_BASE_URL}"
-
-      - name: Publicar a plataforma Android gerada
-        if: always() && hashFiles('android/build.gradle', 'android/build.gradle.kts') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-platform
-          path: |
-            android
-            !android/.gradle
-            !android/app/build
-          if-no-files-found: ignore
 
       - name: QG-07 Testes de sistema (integration_test)
         if: hashFiles('integration_test/**/*_test.dart') != ''
