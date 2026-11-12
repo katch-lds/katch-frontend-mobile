@@ -18,11 +18,13 @@ class HttpApiClient implements ApiClient {
     required CredentialProvider credentials,
     required ConnectionMonitor monitor,
     http.Client? client,
+    void Function(String message)? log,
   }) : _baseUrl = trimTrailingSlashes(baseUrl),
        _requestTimeout = requestTimeout,
        _credentials = credentials,
        _monitor = monitor,
-       _client = client ?? http.Client();
+       _client = client ?? http.Client(),
+       _log = log;
 
   /// Valor do cabeçalho `X-Client-App` da aplicação móvel (API v02, 3.2).
   static const clientApp = 'mobile';
@@ -35,6 +37,10 @@ class HttpApiClient implements ApiClient {
   final CredentialProvider _credentials;
   final ConnectionMonitor _monitor;
   final http.Client _client;
+
+  /// Registo de cada pedido (método, rota, código e `code` do erro), só na
+  /// variante de depuração. Nunca inclui a credencial nem o corpo do pedido.
+  final void Function(String message)? _log;
 
   @override
   Future<Object?> get(String path) => _send('GET', path);
@@ -65,13 +71,18 @@ class HttpApiClient implements ApiClient {
       response = await http.Response.fromStream(streamed);
     } on Exception {
       _monitor.reportFailure();
+      _log?.call('$method $path -> sem resposta (falha de ligação)');
       throw const ConnectionFailure();
     }
     _monitor.reportSuccess();
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      _log?.call('$method $path -> ${response.statusCode}');
       return response.body.isEmpty ? null : jsonDecode(response.body);
     }
-    throw _toException(path, response);
+    final failure = _toException(path, response);
+    final code = failure is ApiRejection ? ' ${failure.error.code}' : '';
+    _log?.call('$method $path -> ${response.statusCode}$code');
+    throw failure;
   }
 
   Map<String, String> _headers() {

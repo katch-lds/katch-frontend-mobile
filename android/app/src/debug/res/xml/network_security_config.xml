@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Configuração de rede só da variante de depuração (I075; plano de testes do frontend mobile, secções 5 e 15).
+     Permite tráfego sem TLS apenas para 10.0.2.2, o endereço do computador anfitrião visto a partir do emulador
+     Android, onde a API local responde em http://10.0.2.2:5180. Os restantes endereços continuam a exigir HTTPS.
+     A variante de produção (release) não usa este ficheiro e mantém a regra por omissão do Android: sem tráfego
+     sem TLS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>
