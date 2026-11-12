@@ -1,0 +1,30 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:katch_mobile/core/api_exception.dart';
+import 'package:katch_mobile/state/load_status.dart';
+import 'package:katch_mobile/state/reference_data_store.dart';
+
+import '../support/fakes.dart';
+
+void main() {
+  test(
+    'pede as localidades uma vez e volta a pedir depois de falhar',
+    () async {
+      final service = FakeReferenceListService();
+      service.locationAnswers.add(() => throw const ConnectionFailure());
+      final store = ReferenceDataStore(service);
+
+      await store.loadLocations();
+
+      expect(store.status, LoadStatus.failed);
+      expect(store.error, isA<ConnectionFailure>());
+
+      await store.loadLocations();
+      await store.loadLocations();
+
+      expect(store.status, LoadStatus.loaded);
+      expect(store.locations, [braga, felgueiras]);
+      expect(store.error, isNull);
+      expect(service.locationCalls, 2);
+    },
+  );
+}
