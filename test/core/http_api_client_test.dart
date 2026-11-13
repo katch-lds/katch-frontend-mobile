@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +8,7 @@ import 'package:http/testing.dart';
 import 'package:katch_mobile/core/api_exception.dart';
 import 'package:katch_mobile/core/connection_monitor.dart';
 import 'package:katch_mobile/core/http_api_client.dart';
+import 'package:katch_mobile/models/file_selection.dart';
 import 'package:katch_mobile/session/session_manager.dart';
 
 import '../support/fakes.dart';
@@ -164,4 +166,128 @@ void main() {
     ]);
     expect(messages.join(), isNot(contains('segredo')));
   });
+
+  group('upload (API v02, 2.6)', () {
+    late List<http.BaseRequest> sent;
+    late List<String> bodies;
+
+    HttpApiClient uploadClient(int status, [Object? body]) {
+      return HttpApiClient(
+        baseUrl: 'https://api.test',
+        requestTimeout: const Duration(seconds: 1),
+        credentials: session,
+        monitor: monitor,
+        client: _RecordingClient((request, body0) {
+          sent.add(request);
+          bodies.add(body0);
+          final text = body == null ? '' : jsonEncode(body);
+          return http.StreamedResponse(
+            Stream.value(utf8.encode(text)),
+            status,
+            headers: {'content-type': 'application/json'},
+          );
+        }),
+      );
+    }
+
+    setUp(() {
+      sent = [];
+      bodies = [];
+    });
+
+    test('envia o ficheiro em memória no campo file, com PUT', () async {
+      await session.start(candidateLogin(token: 'abc'));
+      final client = uploadClient(204);
+
+      await client.upload(
+        '/api/candidate/profile/cv',
+        FileSelection.fromBytes('cv.pdf', '%PDF-1.4'.codeUnits),
+      );
+
+      final request = sent.single;
+      expect(request.method, 'PUT');
+      expect(request.url.path, '/api/candidate/profile/cv');
+      expect(request.headers['Authorization'], 'Bearer abc');
+      expect(request.headers['X-Client-App'], 'mobile');
+      expect(
+        request.headers['content-type'],
+        startsWith('multipart/form-data'),
+      );
+      expect(bodies.single, contains('name="file"; filename="cv.pdf"'));
+      expect(bodies.single, contains('%PDF-1.4'));
+    });
+
+    test('envia o ficheiro a partir do caminho local', () async {
+      final dir = await Directory.systemTemp.createTemp('katch-upload');
+      addTearDown(() => dir.delete(recursive: true));
+      final file = File('${dir.path}/foto.png');
+      await file.writeAsBytes([0x89, 0x50, 0x4E, 0x47]);
+      final client = uploadClient(204);
+
+      await client.upload(
+        '/api/candidate/profile/photo',
+        FileSelection(name: 'foto.png', sizeBytes: 4, path: file.path),
+      );
+
+      expect(bodies.single, contains('filename="foto.png"'));
+    });
+
+    test('um ficheiro local que deixou de existir é erro inesperado', () async {
+      final client = uploadClient(204);
+
+      final call = client.upload(
+        '/api/candidate/profile/photo',
+        const FileSelection(
+          name: 'x.png',
+          sizeBytes: 1,
+          path: '/nao/existe/x.png',
+        ),
+      );
+
+      await expectLater(call, throwsA(isA<UnexpectedFailure>()));
+      expect(sent, isEmpty);
+    });
+
+    test('a rejeição do ficheiro chega como ApiRejection (ERR-11)', () async {
+      await session.start(candidateLogin(token: 'abc'));
+      final client = uploadClient(400, {
+        'code': 'ERR-11',
+        'message': 'O ficheiro não é aceite.',
+        'fields': [
+          {'field': 'file', 'reason': 'O ficheiro excede 5 MB.'},
+        ],
+      });
+
+      final call = client.upload(
+        '/api/candidate/profile/photo',
+        FileSelection.fromBytes('a.jpg', [0xFF, 0xD8, 0xFF]),
+      );
+
+      await expectLater(
+        call,
+        throwsA(
+          isA<ApiRejection>().having(
+            (e) => e.error.reasonFor('file'),
+            'reason',
+            'O ficheiro excede 5 MB.',
+          ),
+        ),
+      );
+    });
+  });
+}
+
+/// Cliente HTTP que regista o pedido e o corpo enviado (incluindo os pedidos
+/// `multipart`, que o `MockClient` não expõe como texto).
+class _RecordingClient extends http.BaseClient {
+  _RecordingClient(this._handler);
+
+  final http.StreamedResponse Function(http.BaseRequest request, String body)
+  _handler;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final bytes = await request.finalize().toBytes();
+    return _handler(request, latin1.decode(bytes));
+  }
 }

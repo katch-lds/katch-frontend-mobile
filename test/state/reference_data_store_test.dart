@@ -27,4 +27,26 @@ void main() {
       expect(service.locationCalls, 2);
     },
   );
+
+  test(
+    'pede as competências uma vez e volta a pedir depois de falhar',
+    () async {
+      final service = FakeReferenceListService();
+      service.skillAnswers.add(() => throw const ConnectionFailure());
+      final store = ReferenceDataStore(service);
+
+      await store.loadSkills();
+
+      expect(store.skillsStatus, LoadStatus.failed);
+      expect(store.skillsError, isA<ConnectionFailure>());
+
+      await store.loadSkills();
+      await store.loadSkills();
+
+      expect(store.skillsStatus, LoadStatus.loaded);
+      expect(store.skills, [dotnet, flutterSkill, sql]);
+      expect(store.skillsError, isNull);
+      expect(service.skillCalls, 2);
+    },
+  );
 }

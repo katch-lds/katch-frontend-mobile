@@ -43,6 +43,15 @@ contarem como não cobertos; a pipeline verifica que está atualizado. O `lib/ma
 A credencial de sessão (JWT) fica no armazenamento seguro do Android (`flutter_secure_storage`) e nunca é escrita nos
 registos. A sessão é restaurada no arranque enquanto não expirar (8 horas).
 
+## Perfil do Candidato
+
+O separador «Perfil» (M05) grava a função pretendida, a localidade, a disponibilidade e o resumo da experiência e dá
+acesso à fotografia, ao curriculum vitae e às hiperligações (M06), às competências (M07) e às preferências de procura
+(M08). A validação local repete as regras da API v02 (P01, P02, P06 a P08, P10) só para indicar o motivo antes de
+enviar; o servidor volta a validar tudo. A fotografia e o curriculum vitae são escolhidos com o seletor de ficheiros do
+Android (`file_selector`) e enviados em `multipart/form-data`, no campo `file`. A fotografia é pedida à API com a
+credencial de sessão.
+
 ## Estrutura
 
 As pastas de `lib/` seguem as camadas do modelo de classes do frontend mobile v02 (secção 2.3): `app`, `core`
