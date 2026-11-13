@@ -1,13 +1,14 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../screens/account/account_screen.dart';
+import '../screens/profile/profile_screen.dart';
 import '../widgets/connection_banner.dart';
 import 'app_scope.dart';
 
 /// Área do Candidato, com a barra inferior de quatro separadores (9.1).
 ///
-/// Os ecrãs de cada separador chegam com as Issues seguintes (I076 a I078); o
-/// separador «Perfil» já dá acesso à conta (M20).
+/// Os separadores «Explorar», «Matches» e «Conversas» chegam com as Issues
+/// seguintes (I076 e I078); o separador «Perfil» mostra o perfil do Candidato
+/// (M05), com acesso aos ecrãs M06 a M08 e à conta (M20).
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -30,7 +31,7 @@ class _HomeShellState extends State<HomeShell> {
           ConnectionBanner(monitor: monitor),
           Expanded(
             child: _selectedIndex == 3
-                ? const _ProfileTab()
+                ? const ProfileScreen()
                 : const _PendingArea(),
           ),
         ],
@@ -75,27 +76,6 @@ class _PendingArea extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-    );
-  }
-}
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.manage_accounts_outlined),
-          title: const Text('Conta'),
-          subtitle: const Text('Palavra-passe e fim de sessão'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(builder: (_) => const AccountScreen()),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
 import '../models/api_error_dto.dart';
+import '../models/file_selection.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
 import 'connection_monitor.dart';
@@ -28,6 +30,9 @@ class HttpApiClient implements ApiClient {
 
   /// Valor do cabeçalho `X-Client-App` da aplicação móvel (API v02, 3.2).
   static const clientApp = 'mobile';
+
+  /// Campo do pedido `multipart/form-data` com o ficheiro (API v02, 2.6).
+  static const uploadField = 'file';
 
   /// Pedido de início de sessão, cujos erros chegam como `ApiRejection`.
   static const loginPath = '/api/auth/login';
@@ -58,13 +63,51 @@ class HttpApiClient implements ApiClient {
   @override
   Future<void> delete(String path) => _send('DELETE', path);
 
-  Future<Object?> _send(String method, String path, [Object? body]) async {
+  @override
+  Future<void> upload(String path, FileSelection file) async {
+    final request = http.MultipartRequest('PUT', Uri.parse('$_baseUrl$path'));
+    request.headers.addAll(_headers());
+    request.files.add(await _multipartFile(file));
+    await _dispatch('PUT', path, request);
+  }
+
+  /// O ficheiro escolhido pode ter deixado de existir no dispositivo; essa
+  /// falha não é da API e é tratada como erro inesperado.
+  static Future<http.MultipartFile> _multipartFile(FileSelection file) async {
+    final localPath = file.path;
+    if (localPath == null) {
+      return http.MultipartFile.fromBytes(
+        uploadField,
+        file.bytes ?? const [],
+        filename: file.name,
+      );
+    }
+    try {
+      return await http.MultipartFile.fromPath(
+        uploadField,
+        localPath,
+        filename: file.name,
+      );
+    } on FileSystemException {
+      throw const UnexpectedFailure(null);
+    }
+  }
+
+  Future<Object?> _send(String method, String path, [Object? body]) {
     final request = http.Request(method, Uri.parse('$_baseUrl$path'));
     request.headers.addAll(_headers());
     if (body != null) {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
     }
+    return _dispatch(method, path, request);
+  }
+
+  Future<Object?> _dispatch(
+    String method,
+    String path,
+    http.BaseRequest request,
+  ) async {
     final http.Response response;
     try {
       final streamed = await _client.send(request).timeout(_requestTimeout);

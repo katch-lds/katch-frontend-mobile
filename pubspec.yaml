@@ -14,7 +14,7 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   # Material Design, separado do SDK desde o Flutter 3.47 (package:flutter/material.dart depreciado).
   material_ui: ^1.11.0
-
+  file_selector: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
