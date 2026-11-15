@@ -79,6 +79,32 @@ void main() {
     expect(InputRules.isValidDistanceKm(501), isFalse);
   });
 
+  test('linkError limita a 500 caracteres antes do esquema (API v02)', () {
+    const base = 'https://exemplo.pt/';
+    final limit = '$base${'a' * (500 - base.length)}';
+    expect(InputRules.linkError(limit), isNull);
+    expect(
+      InputRules.linkError('${limit}a'),
+      'O texto não pode exceder 500 caracteres.',
+    );
+    expect(
+      InputRules.linkError('ftp://${'a' * 600}'),
+      'O texto não pode exceder 500 caracteres.',
+    );
+    expect(InputRules.linkError('exemplo.pt'), InputRules.linkReason);
+  });
+
+  test('isValidSalary aceita de 0 a 99 999 999,99 €', () {
+    expect(InputRules.isValidSalary(0), isTrue);
+    expect(InputRules.isValidSalary(99999999.99), isTrue);
+    expect(InputRules.isValidSalary(100000000), isFalse);
+    expect(InputRules.isValidSalary(-1), isFalse);
+  });
+
+  test('o limite dos ficheiros é 5 MiB = 5 242 880 bytes (P01, P02)', () {
+    expect(InputRules.maxFileBytes, 5242880);
+  });
+
   test('isValidLink exige http:// ou https:// (P10)', () {
     expect(InputRules.isValidLink('https://exemplo.pt'), isTrue);
     expect(InputRules.isValidLink(' HTTP://exemplo.pt '), isTrue);

@@ -132,6 +132,59 @@ void main() {
     expect(monitor.hasFailure, isTrue);
   });
 
+  test(
+    'os cabeçalhos sem o corpo no tempo limite são falha de ligação',
+    () async {
+      // O servidor envia o código e os cabeçalhos e deixa de enviar o corpo.
+      final client = HttpApiClient(
+        baseUrl: 'https://api.test',
+        requestTimeout: const Duration(milliseconds: 20),
+        credentials: session,
+        monitor: monitor,
+        client: _RecordingClient(
+          (_, _) => http.StreamedResponse(
+            StreamController<List<int>>().stream,
+            200,
+            headers: {'content-type': 'application/json'},
+          ),
+        ),
+      );
+
+      await expectLater(
+        client.get('/api/candidate/profile'),
+        throwsA(isA<ConnectionFailure>()),
+      );
+      expect(monitor.hasFailure, isTrue);
+    },
+  );
+
+  test('o envio de ficheiros tem um tempo limite próprio', () async {
+    expect(
+      HttpApiClient.defaultUploadTimeout,
+      greaterThan(const Duration(seconds: 9)),
+    );
+    Future<http.StreamedResponse> slow(http.BaseRequest request) async {
+      await request.finalize().drain<void>();
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      return http.StreamedResponse(Stream.value(const <int>[]), 204);
+    }
+
+    final client = HttpApiClient(
+      baseUrl: 'https://api.test',
+      requestTimeout: const Duration(milliseconds: 20),
+      uploadTimeout: const Duration(seconds: 2),
+      credentials: session,
+      monitor: monitor,
+      client: _DelayedClient(slow),
+    );
+
+    await client.upload(
+      '/api/candidate/profile/cv',
+      FileSelection.fromBytes('cv.pdf', '%PDF-1.4'.codeUnits),
+    );
+    await expectLater(client.get('/api/x'), throwsA(isA<ConnectionFailure>()));
+  });
+
   test('regista o método, a rota e o código, sem a credencial', () async {
     await session.start(candidateLogin(token: 'segredo'));
     final messages = <String>[];
@@ -289,5 +342,18 @@ class _RecordingClient extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final bytes = await request.finalize().toBytes();
     return _handler(request, latin1.decode(bytes));
+  }
+}
+
+/// Cliente HTTP que responde com a função indicada (por exemplo, com atraso).
+class _DelayedClient extends http.BaseClient {
+  _DelayedClient(this._handler);
+
+  final Future<http.StreamedResponse> Function(http.BaseRequest request)
+  _handler;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    return _handler(request);
   }
 }

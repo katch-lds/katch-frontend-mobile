@@ -43,4 +43,21 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('remote-image-placeholder')), findsOneWidget);
   });
+
+  testWidgets('não envia a credencial a um URL fora da API', (tester) async {
+    final app = TestApp();
+    await app.session.start(candidateLogin(token: 'abc'));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: RemoteImage(
+          url: 'https://outro.exemplo.pt/api/files/a.jpg',
+          baseUrl: 'https://api.test',
+          credentials: app.session,
+        ),
+      ),
+    );
+
+    expect(find.byType(Image), findsNothing);
+    expect(find.byKey(const Key('remote-image-placeholder')), findsOneWidget);
+  });
 }

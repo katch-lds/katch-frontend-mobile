@@ -76,9 +76,11 @@ import 'package:katch_mobile/state/skills_controller.dart';
 import 'package:katch_mobile/widgets/connection_banner.dart';
 import 'package:katch_mobile/widgets/field_error_text.dart';
 import 'package:katch_mobile/widgets/form_message.dart';
-import 'package:katch_mobile/widgets/load_failure_view.dart';
+import 'package:katch_mobile/widgets/load_state_view.dart';
+import 'package:katch_mobile/widgets/option_chips.dart';
 import 'package:katch_mobile/widgets/remote_image.dart';
 import 'package:katch_mobile/widgets/save_button.dart';
+import 'package:katch_mobile/widgets/skill_chip.dart';
 
 void main() {
   test('importa todos os ficheiros de lib/', () {

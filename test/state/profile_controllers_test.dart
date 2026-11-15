@@ -102,6 +102,14 @@ void main() {
       expect(await controller.save(), isTrue);
     });
 
+    test('o contador conta como a validação, sem os espaços (P08)', () async {
+      await controller.load();
+      controller.experienceSummary = '  ${'a' * 1000}   ';
+
+      expect(controller.summaryLength, 1000);
+      expect(controller.validate(), isTrue);
+    });
+
     test('exige a localidade e limita a função a 150 caracteres', () async {
       await controller.load();
       controller
@@ -278,6 +286,27 @@ void main() {
       expect(controller.errors.isEmpty, isTrue);
       expect(await controller.save(), isTrue);
       expect(service.linkRequests.single.urls, isEmpty);
+    });
+
+    test('rejeita 501 caracteres e endereços repetidos (RF012)', () async {
+      const base = 'https://exemplo.pt/';
+      controller
+        ..addLink()
+        ..addLink()
+        ..setLink(0, '$base${'a' * (501 - base.length)}')
+        ..setLink(1, 'https://exemplo.pt/rita')
+        ..setLink(2, ' https://exemplo.pt/rita ');
+
+      expect(await controller.save(), isFalse);
+      expect(
+        controller.errors.reasonFor(ProfileFilesController.linkField(0)),
+        InputRules.textTooLongReason(500),
+      );
+      expect(
+        controller.errors.reasonFor(ProfileFilesController.linkField(2)),
+        InputRules.linkRepeatedReason,
+      );
+      expect(service.linkRequests, isEmpty);
     });
 
     test('a recusa do servidor fica no campo do ficheiro enviado', () async {
@@ -560,6 +589,19 @@ void main() {
         ),
         InputRules.salaryReason,
       );
+
+      controller
+        ..maxDistanceText = '10'
+        ..minSalaryText = '12345678901234';
+      expect(controller.validate(), isFalse);
+      expect(
+        controller.errors.reasonFor(
+          PreferencesController.minSalaryExpectationField,
+        ),
+        InputRules.salaryReason,
+      );
+      controller.minSalaryText = '99999999,99';
+      expect(controller.validate(), isTrue);
 
       controller.maxDistanceText = '12.5';
       expect(controller.maxDistanceKm, isNull);
