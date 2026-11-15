@@ -143,10 +143,20 @@ class ProfileFilesController extends ChangeNotifier {
     if (_links.length > InputRules.maxLinks) {
       errors.add(linksField, InputRules.tooManyLinksReason);
     }
-    final urls = _cleanLinks();
-    for (var index = 0; index < urls.length; index++) {
-      if (!InputRules.isValidLink(urls[index])) {
-        errors.add(linkField(index), InputRules.linkReason);
+    // Comprimento, esquema e repetição, pela ordem do backend (RF012). O
+    // motivo fica no campo da hiperligação no ecrã; as vazias são ignoradas.
+    final seen = <String>{};
+    for (var index = 0; index < _links.length; index++) {
+      final url = _links[index].url.trim();
+      if (url.isEmpty) {
+        continue;
+      }
+      final repeated = !seen.add(url);
+      final reason =
+          InputRules.linkError(url) ??
+          (repeated ? InputRules.linkRepeatedReason : null);
+      if (reason != null) {
+        errors.add(linkField(index), reason);
       }
     }
     _errors = errors;

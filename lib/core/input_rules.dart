@@ -35,7 +35,8 @@ abstract final class InputRules {
   static const distanceReason =
       'A distância máxima tem de ser um número inteiro entre 1 e 500.';
 
-  /// Pretensão salarial que não é um valor em euros (RF007).
+  /// Pretensão salarial negativa, acima de 99 999 999,99 € ou que não é um
+  /// valor em euros (RF007; igual ao motivo do backend).
   static const salaryReason = 'O valor tem de ser um número positivo em euros.';
 
   /// Mais de 3 hiperligações (P10, RF012).
@@ -45,6 +46,9 @@ abstract final class InputRules {
   static const linkReason =
       'O endereço tem de começar por http:// ou https://.';
 
+  /// Hiperligação repetida na lista (RF012; igual ao motivo do backend).
+  static const linkRepeatedReason = 'O endereço está repetido.';
+
   /// Fotografia noutro formato (P01, RF010).
   static const photoFormatReason =
       'O ficheiro tem de estar no formato JPEG ou PNG.';
@@ -52,7 +56,8 @@ abstract final class InputRules {
   /// Curriculum vitae noutro formato (P02, RF011).
   static const cvFormatReason = 'O ficheiro tem de estar no formato PDF.';
 
-  /// Ficheiro acima de 5 MB (P01, P02).
+  /// Ficheiro acima de 5 MB (P01, P02). O texto é o da API; o limite é
+  /// `maxFileBytes`.
   static const fileTooLargeReason = 'O ficheiro excede 5 MB.';
 
   /// Texto acima do limite de caracteres (P08).
@@ -71,7 +76,16 @@ abstract final class InputRules {
   /// Número máximo de hiperligações (P10).
   static const maxLinks = 3;
 
-  /// Dimensão máxima da fotografia e do curriculum vitae: 5 MB (P01, P02).
+  /// Limite de cada hiperligação, em caracteres (API v02, 6.2.6).
+  static const linkMaxLength = 500;
+
+  /// Pretensão salarial máxima, em euros (coluna `numeric(10,2)`; igual ao
+  /// limite do backend).
+  static const maxSalaryExpectation = 99999999.99;
+
+  /// Dimensão máxima da fotografia e do curriculum vitae (P01, P02): «5 MB»
+  /// é 5 × 1024 × 1024 = 5 242 880 bytes (5 MiB), o mesmo valor do backend.
+  /// Um ficheiro com 5 242 881 bytes é recusado.
   static const maxFileBytes = 5 * 1024 * 1024;
 
   static final _customSkill = RegExp(r'^[\p{L}0-9 +#.\-]+$', unicode: true);
@@ -118,10 +132,28 @@ abstract final class InputRules {
       value >= 1 && value <= maxDistanceKm;
 
   /// Endereço iniciado por `http://` ou `https://` (P10).
-  static bool isValidLink(String value) {
-    final url = value.trim().toLowerCase();
-    return url.startsWith('http://') || url.startsWith('https://');
+  static bool isValidLink(String value) => linkError(value) == null;
+
+  /// Motivo da recusa de uma hiperligação, ou `null`: no máximo 500
+  /// caracteres e iniciada por `http://` ou `https://` (P10), pela mesma
+  /// ordem do backend. A repetição é verificada na lista
+  /// (`linkRepeatedReason`).
+  static String? linkError(String value) {
+    final url = value.trim();
+    if (url.length > linkMaxLength) {
+      return textTooLongReason(linkMaxLength);
+    }
+    final lower = url.toLowerCase();
+    if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
+      return linkReason;
+    }
+    return null;
   }
+
+  /// Pretensão salarial entre 0 e 99 999 999,99 € (igual ao backend; a API
+  /// arredonda a 2 casas decimais).
+  static bool isValidSalary(double value) =>
+      value >= 0 && value <= maxSalaryExpectation;
 
   /// No máximo 1000 caracteres, sem os espaços das extremidades (P08).
   static bool isValidSummary(String value) =>

@@ -29,10 +29,18 @@ class _HomeShellState extends State<HomeShell> {
       body: Column(
         children: [
           ConnectionBanner(monitor: monitor),
+          // Os separadores ficam montados: trocar de separador não descarta
+          // as edições por gravar do perfil (M05).
           Expanded(
-            child: _selectedIndex == 3
-                ? const ProfileScreen()
-                : const _PendingArea(),
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: const [
+                _PendingArea(),
+                _PendingArea(),
+                _PendingArea(),
+                ProfileScreen(),
+              ],
+            ),
           ),
         ],
       ),

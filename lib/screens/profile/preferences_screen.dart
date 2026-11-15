@@ -9,7 +9,8 @@ import '../../state/preferences_controller.dart';
 import '../../state/profile_store.dart';
 import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
-import '../../widgets/load_failure_view.dart';
+import '../../widgets/load_state_view.dart';
+import '../../widgets/option_chips.dart';
 import '../../widgets/save_button.dart';
 
 /// Preferências de procura, M08 (RF007).
@@ -79,11 +80,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
               builder: (context, _) {
                 if (!_ready) {
                   return _store.status == LoadStatus.failed
-                      ? LoadFailureView(
+                      ? LoadStateView.failed(
                           message: null,
                           onRetry: () => unawaited(_load()),
                         )
-                      : const Center(child: CircularProgressIndicator());
+                      : const LoadStateView.loading();
                 }
                 return _buildForm(context);
               },
@@ -145,38 +146,24 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
           const SizedBox(height: 24),
           Text('Regime de trabalho', style: titleStyle),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final mode in WorkMode.values)
-                FilterChip(
-                  key: Key('preferences-mode-${mode.wire}'),
-                  label: Text(mode.label),
-                  selected: _controller.workModes.contains(mode),
-                  onSelected: loading
-                      ? null
-                      : (_) => _controller.toggleWorkMode(mode),
-                ),
-            ],
+          OptionChips<WorkMode>(
+            options: WorkMode.values,
+            selected: _controller.workModes,
+            labelOf: (mode) => mode.label,
+            keyOf: (mode) => Key('preferences-mode-${mode.wire}'),
+            onToggle: _controller.toggleWorkMode,
+            enabled: !loading,
           ),
           const SizedBox(height: 24),
           Text('Tipo de contrato', style: titleStyle),
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final type in ContractType.values)
-                FilterChip(
-                  key: Key('preferences-contract-${type.wire}'),
-                  label: Text(type.label),
-                  selected: _controller.contractTypes.contains(type),
-                  onSelected: loading
-                      ? null
-                      : (_) => _controller.toggleContractType(type),
-                ),
-            ],
+          OptionChips<ContractType>(
+            options: ContractType.values,
+            selected: _controller.contractTypes,
+            labelOf: (type) => type.label,
+            keyOf: (type) => Key('preferences-contract-${type.wire}'),
+            onToggle: _controller.toggleContractType,
+            enabled: !loading,
           ),
           FormMessage(message: _controller.errorMessage),
           const SizedBox(height: 8),

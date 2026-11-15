@@ -7,8 +7,10 @@ import '../core/url.dart';
 /// Fotografia ou logótipo servido por um URL da API (modelo de classes, 9.4).
 ///
 /// Os URL `/api/files/{kind}/{fileName}` só servem o ficheiro com credencial
-/// (API v02, 6.9.1), pelo que o pedido leva o cabeçalho de autorização. Sem
-/// URL, ou se o ficheiro não for obtido, mostra o marcador do protótipo.
+/// (API v02, 6.9.1), pelo que o pedido leva o cabeçalho de autorização. A
+/// credencial só é enviada à própria API: um URL que não seja um caminho
+/// `/api/files/...` não é pedido. Sem URL, ou se o ficheiro não for obtido,
+/// mostra o marcador do protótipo.
 class RemoteImage extends StatelessWidget {
   const RemoteImage({
     super.key,
@@ -17,6 +19,9 @@ class RemoteImage extends StatelessWidget {
     required this.credentials,
     this.size = 72,
   });
+
+  /// Prefixo dos URL de ficheiros devolvidos pela API (API v02, 2.6).
+  static const filesPath = '/api/files/';
 
   /// URL relativo devolvido pela API, ou `null`.
   final String? url;
@@ -29,11 +34,11 @@ class RemoteImage extends StatelessWidget {
     final path = url;
     final token = credentials.accessToken;
     final Widget child;
-    if (path == null || token == null) {
+    if (path == null || token == null || !path.startsWith(filesPath)) {
       child = _placeholder(context);
     } else {
       child = Image.network(
-        path.startsWith('http') ? path : '${trimTrailingSlashes(baseUrl)}$path',
+        '${trimTrailingSlashes(baseUrl)}$path',
         key: const Key('remote-image'),
         width: size,
         height: size,

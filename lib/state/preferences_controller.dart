@@ -113,7 +113,9 @@ class PreferencesController extends ChangeNotifier {
         (distance == null || !InputRules.isValidDistanceKm(distance))) {
       errors.add(maxDistanceKmField, InputRules.distanceReason);
     }
-    if (_minSalaryText.trim().isNotEmpty && minSalaryExpectation == null) {
+    final salary = minSalaryExpectation;
+    if (_minSalaryText.trim().isNotEmpty &&
+        (salary == null || !InputRules.isValidSalary(salary))) {
       errors.add(minSalaryExpectationField, InputRules.salaryReason);
     }
     _errors = errors;

@@ -8,8 +8,9 @@ import '../../state/skills_controller.dart';
 import '../../widgets/connection_banner.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
-import '../../widgets/load_failure_view.dart';
+import '../../widgets/load_state_view.dart';
 import '../../widgets/save_button.dart';
+import '../../widgets/skill_chip.dart';
 
 /// Competências do Candidato como etiquetas, M07 (RF008, RF009).
 ///
@@ -98,9 +99,9 @@ class _SkillsScreenState extends State<SkillsScreen> {
               builder: (context, _) {
                 switch (_controller.loadStatus) {
                   case LoadStatus.idle || LoadStatus.loading:
-                    return const Center(child: CircularProgressIndicator());
+                    return const LoadStateView.loading();
                   case LoadStatus.failed:
-                    return LoadFailureView(
+                    return LoadStateView.failed(
                       message: _controller.errorMessage,
                       fallback: 'Não foi possível obter as competências.',
                       onRetry: () => unawaited(_controller.load()),
@@ -135,23 +136,19 @@ class _SkillsScreenState extends State<SkillsScreen> {
               runSpacing: 8,
               children: [
                 for (final skill in selected)
-                  InputChip(
+                  SkillChip(
                     key: Key('skill-chip-${skill.name}'),
-                    label: Text(skill.name),
+                    label: skill.name,
                     onDeleted: loading ? null : () => _controller.toggle(skill),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    deleteButtonTooltipMessage: 'Retirar',
                   ),
                 for (final skill in custom)
-                  InputChip(
+                  SkillChip(
                     key: Key('custom-chip-${skill.label}'),
-                    avatar: const Icon(Icons.edit_outlined, size: 16),
-                    label: Text(skill.label),
+                    label: skill.label,
+                    custom: true,
                     onDeleted: loading
                         ? null
                         : () => _controller.removeCustom(skill),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    deleteButtonTooltipMessage: 'Retirar',
                   ),
               ],
             ),

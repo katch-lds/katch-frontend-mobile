@@ -49,8 +49,11 @@ O separador «Perfil» (M05) grava a função pretendida, a localidade, a dispon
 acesso à fotografia, ao curriculum vitae e às hiperligações (M06), às competências (M07) e às preferências de procura
 (M08). A validação local repete as regras da API v02 (P01, P02, P06 a P08, P10) só para indicar o motivo antes de
 enviar; o servidor volta a validar tudo. A fotografia e o curriculum vitae são escolhidos com o seletor de ficheiros do
-Android (`file_selector`) e enviados em `multipart/form-data`, no campo `file`. A fotografia é pedida à API com a
-credencial de sessão.
+Android (`file_selector`) e enviados em `multipart/form-data`, no campo `file`. O limite de 5 MB dos ficheiros é
+5 × 1024 × 1024 = 5 242 880 bytes (5 MiB), o mesmo do backend. O envio de um ficheiro tem um tempo limite próprio de
+60 segundos; os restantes pedidos mantêm os 9 segundos. A fotografia é pedida à API com a credencial de sessão, só para
+os caminhos `/api/files/...` da própria API. Os separadores da área do Candidato ficam montados, para que trocar de
+separador não descarte as edições do perfil por gravar.
 
 ## Estrutura
 

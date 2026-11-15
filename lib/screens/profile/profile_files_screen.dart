@@ -11,7 +11,7 @@ import '../../state/profile_store.dart';
 import '../../widgets/connection_banner.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
-import '../../widgets/load_failure_view.dart';
+import '../../widgets/load_state_view.dart';
 import '../../widgets/remote_image.dart';
 import '../../widgets/save_button.dart';
 
@@ -84,11 +84,11 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
                 final profile = _store.profile;
                 if (profile == null) {
                   return _store.status == LoadStatus.failed
-                      ? LoadFailureView(
+                      ? LoadStateView.failed(
                           message: null,
                           onRetry: () => unawaited(_load()),
                         )
-                      : const Center(child: CircularProgressIndicator());
+                      : const LoadStateView.loading();
                 }
                 final loading = _controller.status == LoadStatus.loading;
                 final errors = _controller.errors;

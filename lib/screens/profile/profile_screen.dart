@@ -10,7 +10,7 @@ import '../../state/load_status.dart';
 import '../../state/profile_form_controller.dart';
 import '../../state/profile_store.dart';
 import '../../widgets/form_message.dart';
-import '../../widgets/load_failure_view.dart';
+import '../../widgets/load_state_view.dart';
 import '../../widgets/remote_image.dart';
 import '../../widgets/save_button.dart';
 import '../account/account_screen.dart';
@@ -78,9 +78,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final profile = _store.profile;
         switch (_controller.loadStatus) {
           case LoadStatus.idle || LoadStatus.loading:
-            return const Center(child: CircularProgressIndicator());
+            return const LoadStateView.loading();
           case LoadStatus.failed:
-            return LoadFailureView(
+            return LoadStateView.failed(
               message: _controller.errorMessage,
               onRetry: () => unawaited(_controller.load()),
             );
@@ -88,7 +88,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             break;
         }
         if (profile == null) {
-          return const Center(child: CircularProgressIndicator());
+          return const LoadStateView.loading();
         }
         return _buildForm(context, profile);
       },

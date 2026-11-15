@@ -53,8 +53,9 @@ class ProfileFormController extends ChangeNotifier {
 
   String get experienceSummary => _experienceSummary;
 
-  /// Caracteres do resumo, para o contador «n/1000».
-  int get summaryLength => _experienceSummary.length;
+  /// Caracteres do resumo, para o contador «n/1000», contados como na
+  /// validação e no backend: sem os espaços das extremidades (P08).
+  int get summaryLength => _experienceSummary.trim().length;
 
   List<ReferenceItemDto> get locations => _reference.locations;
 

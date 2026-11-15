@@ -19,10 +19,12 @@ class HttpApiClient implements ApiClient {
     required Duration requestTimeout,
     required CredentialProvider credentials,
     required ConnectionMonitor monitor,
+    Duration uploadTimeout = defaultUploadTimeout,
     http.Client? client,
     void Function(String message)? log,
   }) : _baseUrl = trimTrailingSlashes(baseUrl),
        _requestTimeout = requestTimeout,
+       _uploadTimeout = uploadTimeout,
        _credentials = credentials,
        _monitor = monitor,
        _client = client ?? http.Client(),
@@ -34,11 +36,17 @@ class HttpApiClient implements ApiClient {
   /// Campo do pedido `multipart/form-data` com o ficheiro (API v02, 2.6).
   static const uploadField = 'file';
 
+  /// Tempo limite do envio de um ficheiro (fotografia ou curriculum vitae,
+  /// até 5 MiB): o envio inteiro numa ligação móvel lenta pode passar os 9 s
+  /// dos restantes pedidos (RNF014). Uma ligação recusada falha logo.
+  static const defaultUploadTimeout = Duration(seconds: 60);
+
   /// Pedido de início de sessão, cujos erros chegam como `ApiRejection`.
   static const loginPath = '/api/auth/login';
 
   final String _baseUrl;
   final Duration _requestTimeout;
+  final Duration _uploadTimeout;
   final CredentialProvider _credentials;
   final ConnectionMonitor _monitor;
   final http.Client _client;
@@ -68,7 +76,7 @@ class HttpApiClient implements ApiClient {
     final request = http.MultipartRequest('PUT', Uri.parse('$_baseUrl$path'));
     request.headers.addAll(_headers());
     request.files.add(await _multipartFile(file));
-    await _dispatch('PUT', path, request);
+    await _dispatch('PUT', path, request, _uploadTimeout);
   }
 
   /// O ficheiro escolhido pode ter deixado de existir no dispositivo; essa
@@ -100,18 +108,23 @@ class HttpApiClient implements ApiClient {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
     }
-    return _dispatch(method, path, request);
+    return _dispatch(method, path, request, _requestTimeout);
   }
 
   Future<Object?> _dispatch(
     String method,
     String path,
     http.BaseRequest request,
+    Duration timeout,
   ) async {
     final http.Response response;
     try {
-      final streamed = await _client.send(request).timeout(_requestTimeout);
-      response = await http.Response.fromStream(streamed);
+      // O tempo limite cobre o pedido e a resposta inteira, corpo incluído: um
+      // servidor que envia os cabeçalhos e pára também é falha de ligação.
+      response = await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(timeout);
     } on Exception {
       _monitor.reportFailure();
       _log?.call('$method $path -> sem resposta (falha de ligação)');
