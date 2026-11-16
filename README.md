@@ -12,8 +12,10 @@ Aplicação móvel do Katch, para o Candidato. Flutter e Dart (I120).
 | Comando | O que faz |
 | --- | --- |
 | `flutter pub get` | Instala as dependências |
+| `dart run tool/coverage_all_files.dart` | Gera `test/coverage_all_files_test.dart`, que importa todos os ficheiros de `lib/` (executar depois de criar ou apagar um ficheiro em `lib/`) |
 | `flutter test --coverage` | Testes unitários e de widget, com cobertura em `coverage/lcov.info` |
-| `dart format --output=none --set-exit-if-changed lib test` | Verifica a formatação (QG-05) |
+| `dart run tool/filter_lcov.dart` | Retira do `coverage/lcov.info` os ficheiros excluídos da cobertura e indica a cobertura de linhas |
+| `dart format --output=none --set-exit-if-changed lib test tool` | Verifica a formatação (QG-05) |
 | `flutter analyze --fatal-infos --fatal-warnings` | Dart analyzer com flutter_lints (QG-05) |
 | `flutter build apk --debug --dart-define=API_BASE_URL=<url>` | Build (QG-01) |
 
@@ -21,6 +23,25 @@ Aplicação móvel do Katch, para o Candidato. Flutter e Dart (I120).
 
 O endereço da API vem de `--dart-define=API_BASE_URL=<url>` no build e no `flutter run`. Sem valor, a aplicação usa
 a API local do emulador. O tempo limite dos pedidos é de 9 segundos. Não há segredos no repositório.
+
+## Rede na variante de depuração
+
+O Android exige HTTPS por omissão. Só a variante de depuração permite tráfego sem TLS, e apenas para `10.0.2.2`, o
+computador anfitrião visto a partir do emulador, onde a API local responde em `http://10.0.2.2:5180`
+(`android/app/src/debug/res/xml/network_security_config.xml`, referido no `android/app/src/debug/AndroidManifest.xml`).
+A variante de produção não usa esta configuração e continua a exigir HTTPS.
+
+## Âmbito da cobertura
+
+A cobertura de linhas mínima é de 40% sobre todos os ficheiros de `lib/` (plano de testes do frontend mobile, secção
+10). O teste gerado `test/coverage_all_files_test.dart` importa todos esses ficheiros, para os ficheiros sem testes
+contarem como não cobertos; a pipeline verifica que está atualizado. O `lib/main.dart` e os ficheiros gerados
+(`*.g.dart`, `*.freezed.dart`, `lib/generated/`) são retirados do `lcov.info` antes da verificação.
+
+## Sessão
+
+A credencial de sessão (JWT) fica no armazenamento seguro do Android (`flutter_secure_storage`) e nunca é escrita nos
+registos. A sessão é restaurada no arranque enquanto não expirar (8 horas).
 
 ## Estrutura
 

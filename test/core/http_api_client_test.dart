@@ -9,6 +9,8 @@ import 'package:katch_mobile/core/connection_monitor.dart';
 import 'package:katch_mobile/core/http_api_client.dart';
 import 'package:katch_mobile/session/session_manager.dart';
 
+import '../support/fakes.dart';
+
 http.Response jsonResponse(int status, Object? body) {
   final headers = {'content-type': 'application/json; charset=utf-8'};
   return http.Response(jsonEncode(body), status, headers: headers);
@@ -37,13 +39,16 @@ void main() {
   }
 
   setUp(() {
-    session = SessionManager();
+    session = SessionManager(
+      storage: MemorySessionStorage(),
+      clock: FakeClock(),
+    );
     monitor = ConnectionMonitor();
     requests = [];
   });
 
   test('envia X-Client-App e a credencial e devolve o JSON', () async {
-    session.start('abc');
+    await session.start(candidateLogin(token: 'abc'));
     final client = clientFor((_) => jsonResponse(200, {'id': 1}));
 
     final result = await client.get('/api/candidate/profile');
@@ -70,7 +75,7 @@ void main() {
   });
 
   test('converte uma rejeição em ApiRejection com o code', () async {
-    session.start('abc');
+    await session.start(candidateLogin(token: 'abc'));
     final client = clientFor((_) => jsonResponse(409, apiError('ERR-30')));
 
     ApiRejection? rejection;
@@ -85,7 +90,7 @@ void main() {
   });
 
   test('termina a sessão quando a credencial é recusada', () async {
-    session.start('abc');
+    await session.start(candidateLogin(token: 'abc'));
     final client = clientFor((_) => jsonResponse(403, apiError('ERR-04')));
 
     final call = client.get('/api/candidate/profile');
@@ -123,5 +128,40 @@ void main() {
 
     await expectLater(call, throwsA(isA<ConnectionFailure>()));
     expect(monitor.hasFailure, isTrue);
+  });
+
+  test('regista o método, a rota e o código, sem a credencial', () async {
+    await session.start(candidateLogin(token: 'segredo'));
+    final messages = <String>[];
+    final client = HttpApiClient(
+      baseUrl: 'https://api.test',
+      requestTimeout: const Duration(milliseconds: 10),
+      credentials: session,
+      monitor: monitor,
+      log: messages.add,
+      client: MockClient((request) async {
+        if (request.url.path == '/api/x') {
+          return jsonResponse(200, {'ok': true});
+        }
+        if (request.url.path == '/api/lenta') {
+          return Completer<http.Response>().future;
+        }
+        return jsonResponse(409, apiError('ERR-30'));
+      }),
+    );
+
+    await client.get('/api/x');
+    await expectLater(client.post('/api/y'), throwsA(isA<ApiRejection>()));
+    await expectLater(
+      client.get('/api/lenta'),
+      throwsA(isA<ConnectionFailure>()),
+    );
+
+    expect(messages, [
+      'GET /api/x -> 200',
+      'POST /api/y -> 409 ERR-30',
+      'GET /api/lenta -> sem resposta (falha de ligação)',
+    ]);
+    expect(messages.join(), isNot(contains('segredo')));
   });
 }

@@ -47,8 +47,17 @@ jobs:
       - name: Instalar dependências
         run: flutter pub get
 
+      # O flutter test --coverage só regista os ficheiros carregados por algum teste. O teste gerado
+      # test/coverage_all_files_test.dart importa todos os ficheiros de lib/ do âmbito da cobertura, para os
+      # ficheiros sem testes contarem como não cobertos (plano de testes do frontend mobile, secção 10; I075).
+      - name: Teste de todos os ficheiros de lib/ atualizado
+        run: dart run tool/coverage_all_files.dart --check
+
       - name: Testes unitários e de widget, com cobertura
         run: flutter test --coverage
+
+      - name: Retirar do lcov.info os ficheiros excluídos da cobertura
+        run: dart run tool/filter_lcov.dart coverage/lcov.info
 
       - name: Cobertura de linhas ≥ 40%
         run: |
@@ -105,7 +114,7 @@ jobs:
         run: flutter pub get
 
       - name: QG-05 Formatação (dart format)
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: dart format --output=none --set-exit-if-changed lib test tool
 
       - name: QG-05 Análise estática (Dart analyzer com flutter_lints)
         run: flutter analyze --fatal-infos --fatal-warnings

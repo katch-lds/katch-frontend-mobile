@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pedidos à API do Katch (I075). Na variante de produção só é aceite HTTPS (regra por omissão do Android). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="katch_mobile"
         android:name="${applicationName}"
