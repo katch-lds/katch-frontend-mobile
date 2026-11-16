@@ -7,6 +7,7 @@ import 'app/katch_app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dependencies = AppDependencies.create(AppConfig.fromEnvironment());
+  WidgetsBinding.instance.addObserver(dependencies.lifecycle);
   runApp(KatchApp(dependencies: dependencies));
   await dependencies.session.restore();
 }

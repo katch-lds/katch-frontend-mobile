@@ -4,13 +4,18 @@ import 'package:http/http.dart' as http;
 import '../core/clock.dart';
 import '../core/connection_monitor.dart';
 import '../core/device_file_picker.dart';
+import '../core/external_launcher.dart';
 import '../core/http_api_client.dart';
+import '../core/platform_external_launcher.dart';
 import '../core/platform_file_picker.dart';
+import '../polling/app_lifecycle_monitor.dart';
 import '../services/auth_service.dart';
 import '../services/candidate_profile_service.dart';
 import '../services/http_auth_service.dart';
 import '../services/http_candidate_profile_service.dart';
+import '../services/http_job_exploration_service.dart';
 import '../services/http_reference_list_service.dart';
+import '../services/job_exploration_service.dart';
 import '../session/secure_session_storage.dart';
 import '../session/session_manager.dart';
 import '../session/session_storage.dart';
@@ -33,6 +38,10 @@ class AppDependencies {
     required this.profileService,
     required this.profile,
     required this.filePicker,
+    required this.clock,
+    required this.lifecycle,
+    required this.jobExploration,
+    required this.launcher,
   });
 
   /// Dependências reais: cliente HTTP da API v02 e armazenamento seguro.
@@ -42,6 +51,7 @@ class AppDependencies {
     Clock clock = const SystemClock(),
     http.Client? client,
     DeviceFilePicker filePicker = const PlatformFilePicker(),
+    ExternalLauncher launcher = const PlatformExternalLauncher(),
   }) {
     final monitor = ConnectionMonitor();
     final session = SessionManager(
@@ -66,6 +76,10 @@ class AppDependencies {
       profileService: profileService,
       profile: ProfileStore(service: profileService, session: session),
       filePicker: filePicker,
+      clock: clock,
+      lifecycle: AppLifecycleMonitor(),
+      jobExploration: HttpJobExplorationService(api),
+      launcher: launcher,
     );
   }
 
@@ -84,4 +98,15 @@ class AppDependencies {
 
   /// Seletor de ficheiros do dispositivo; nos testes, um seletor simulado.
   final DeviceFilePicker filePicker;
+
+  /// Relógio da aplicação; nos testes, um relógio fixo.
+  final Clock clock;
+
+  /// Primeiro ou segundo plano da aplicação, registado em `main.dart`.
+  final AppLifecycleMonitor lifecycle;
+
+  final JobExplorationService jobExploration;
+
+  /// Navegador do dispositivo, para o sítio da Empresa (RF017).
+  final ExternalLauncher launcher;
 }

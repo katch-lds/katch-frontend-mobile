@@ -21,6 +21,7 @@ import 'package:katch_mobile/models/reference_item_dto.dart';
 import 'package:katch_mobile/models/register_candidate_request.dart';
 import 'package:katch_mobile/models/search_preferences_dto.dart';
 import 'package:katch_mobile/models/user_type.dart';
+import 'package:katch_mobile/polling/app_lifecycle_monitor.dart';
 import 'package:katch_mobile/services/auth_service.dart';
 import 'package:katch_mobile/services/candidate_profile_service.dart';
 import 'package:katch_mobile/services/reference_list_service.dart';
@@ -29,6 +30,8 @@ import 'package:katch_mobile/session/session_manager.dart';
 import 'package:katch_mobile/session/session_storage.dart';
 import 'package:katch_mobile/state/profile_store.dart';
 import 'package:katch_mobile/state/reference_data_store.dart';
+
+import 'exploration_fakes.dart';
 
 /// Instante fixo dos testes.
 final testNow = DateTime.utc(2026, 11, 12, 10);
@@ -457,8 +460,14 @@ class TestApp {
       profileService = FakeCandidateProfileService(profile),
       filePicker = FakeFilePicker(),
       clock = FakeClock(),
-      monitor = ConnectionMonitor() {
+      monitor = ConnectionMonitor(),
+      lifecycle = AppLifecycleMonitor(),
+      launcher = FakeLauncher() {
     session = SessionManager(storage: this.storage, clock: clock);
+    jobExploration = FakeJobExplorationService(
+      clock: clock,
+      preferences: () => profileService.profile.preferences,
+    );
     dependencies = AppDependencies(
       config: const AppConfig(
         apiBaseUrl: 'https://api.test',
@@ -471,6 +480,10 @@ class TestApp {
       profileService: profileService,
       profile: ProfileStore(service: profileService, session: session),
       filePicker: filePicker,
+      clock: clock,
+      lifecycle: lifecycle,
+      jobExploration: jobExploration,
+      launcher: launcher,
     );
   }
 
@@ -481,6 +494,9 @@ class TestApp {
   final FakeFilePicker filePicker;
   final FakeClock clock;
   final ConnectionMonitor monitor;
+  final AppLifecycleMonitor lifecycle;
+  final FakeLauncher launcher;
+  late final FakeJobExplorationService jobExploration;
   late final SessionManager session;
   late final AppDependencies dependencies;
 }
