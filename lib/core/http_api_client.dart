@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
 import '../models/api_error_dto.dart';
+import '../models/file_selection.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
 import 'connection_monitor.dart';
@@ -17,10 +19,12 @@ class HttpApiClient implements ApiClient {
     required Duration requestTimeout,
     required CredentialProvider credentials,
     required ConnectionMonitor monitor,
+    Duration uploadTimeout = defaultUploadTimeout,
     http.Client? client,
     void Function(String message)? log,
   }) : _baseUrl = trimTrailingSlashes(baseUrl),
        _requestTimeout = requestTimeout,
+       _uploadTimeout = uploadTimeout,
        _credentials = credentials,
        _monitor = monitor,
        _client = client ?? http.Client(),
@@ -29,11 +33,20 @@ class HttpApiClient implements ApiClient {
   /// Valor do cabeçalho `X-Client-App` da aplicação móvel (API v02, 3.2).
   static const clientApp = 'mobile';
 
+  /// Campo do pedido `multipart/form-data` com o ficheiro (API v02, 2.6).
+  static const uploadField = 'file';
+
+  /// Tempo limite do envio de um ficheiro (fotografia ou curriculum vitae,
+  /// até 5 MiB): o envio inteiro numa ligação móvel lenta pode passar os 9 s
+  /// dos restantes pedidos (RNF014). Uma ligação recusada falha logo.
+  static const defaultUploadTimeout = Duration(seconds: 60);
+
   /// Pedido de início de sessão, cujos erros chegam como `ApiRejection`.
   static const loginPath = '/api/auth/login';
 
   final String _baseUrl;
   final Duration _requestTimeout;
+  final Duration _uploadTimeout;
   final CredentialProvider _credentials;
   final ConnectionMonitor _monitor;
   final http.Client _client;
@@ -58,17 +71,60 @@ class HttpApiClient implements ApiClient {
   @override
   Future<void> delete(String path) => _send('DELETE', path);
 
-  Future<Object?> _send(String method, String path, [Object? body]) async {
+  @override
+  Future<void> upload(String path, FileSelection file) async {
+    final request = http.MultipartRequest('PUT', Uri.parse('$_baseUrl$path'));
+    request.headers.addAll(_headers());
+    request.files.add(await _multipartFile(file));
+    await _dispatch('PUT', path, request, _uploadTimeout);
+  }
+
+  /// O ficheiro escolhido pode ter deixado de existir no dispositivo; essa
+  /// falha não é da API e é tratada como erro inesperado.
+  static Future<http.MultipartFile> _multipartFile(FileSelection file) async {
+    final localPath = file.path;
+    if (localPath == null) {
+      return http.MultipartFile.fromBytes(
+        uploadField,
+        file.bytes ?? const [],
+        filename: file.name,
+      );
+    }
+    try {
+      return await http.MultipartFile.fromPath(
+        uploadField,
+        localPath,
+        filename: file.name,
+      );
+    } on FileSystemException {
+      throw const UnexpectedFailure(null);
+    }
+  }
+
+  Future<Object?> _send(String method, String path, [Object? body]) {
     final request = http.Request(method, Uri.parse('$_baseUrl$path'));
     request.headers.addAll(_headers());
     if (body != null) {
       request.headers['Content-Type'] = 'application/json';
       request.body = jsonEncode(body);
     }
+    return _dispatch(method, path, request, _requestTimeout);
+  }
+
+  Future<Object?> _dispatch(
+    String method,
+    String path,
+    http.BaseRequest request,
+    Duration timeout,
+  ) async {
     final http.Response response;
     try {
-      final streamed = await _client.send(request).timeout(_requestTimeout);
-      response = await http.Response.fromStream(streamed);
+      // O tempo limite cobre o pedido e a resposta inteira, corpo incluído: um
+      // servidor que envia os cabeçalhos e pára também é falha de ligação.
+      response = await _client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(timeout);
     } on Exception {
       _monitor.reportFailure();
       _log?.call('$method $path -> sem resposta (falha de ligação)');

@@ -68,7 +68,10 @@ void main() {
 
       await tester.tap(find.text('Perfil'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Conta'));
+      expect(app.dependencies.profile.profile, isNotNull);
+      final account = find.byKey(const Key('profile-open-account'));
+      await tester.ensureVisible(account);
+      await tester.tap(account);
       await tester.pumpAndSettle();
       expect(find.byType(AccountScreen), findsOneWidget);
 
@@ -79,6 +82,7 @@ void main() {
       expect(find.byType(AccountScreen), findsNothing);
       expect(find.byType(HomeShell), findsNothing);
       expect(app.session.accessToken, isNull);
+      expect(app.dependencies.profile.profile, isNull);
       final navigator = tester.state<NavigatorState>(find.byType(Navigator));
       expect(navigator.canPop(), isFalse);
     },
@@ -97,6 +101,34 @@ void main() {
 
     expect(app.session.status, SessionStatus.expired);
     expect(find.text(LoginScreen.expiredMessage), findsOneWidget);
+  });
+
+  testWidgets('trocar de separador mantém as edições do perfil por gravar', (
+    tester,
+  ) async {
+    final app = TestApp();
+    await app.session.start(candidateLogin());
+    await pumpKatchApp(tester, app);
+    await tester.tap(find.text('Perfil'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('profile-desired-role')),
+      'Analista de dados',
+    );
+    await tester.tap(find.text('Matches'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Perfil'));
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('profile-desired-role')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(field.controller.text, 'Analista de dados');
+    expect(app.profileService.updateRequests, isEmpty);
   });
 
   testWidgets('os separadores ainda sem ecrã indicam a área por fazer', (
