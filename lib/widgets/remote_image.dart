@@ -18,6 +18,7 @@ class RemoteImage extends StatelessWidget {
     required this.baseUrl,
     required this.credentials,
     this.size = 72,
+    this.circular = true,
   });
 
   /// Prefixo dos URL de ficheiros devolvidos pela API (API v02, 2.6).
@@ -28,6 +29,11 @@ class RemoteImage extends StatelessWidget {
   final String baseUrl;
   final CredentialProvider credentials;
   final double size;
+
+  /// Redonda, com `size` de diâmetro (fotografia de perfil, logótipo); com
+  /// `false`, ocupa o espaço dado pelo widget pai, com os cantos arredondados
+  /// (fotografias da vaga e da galeria da Empresa).
+  final bool circular;
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +46,20 @@ class RemoteImage extends StatelessWidget {
       child = Image.network(
         '${trimTrailingSlashes(baseUrl)}$path',
         key: const Key('remote-image'),
-        width: size,
-        height: size,
+        width: circular ? size : null,
+        height: circular ? size : null,
         fit: BoxFit.cover,
         headers: {
           'Authorization': 'Bearer $token',
           'X-Client-App': HttpApiClient.clientApp,
         },
         errorBuilder: (context, _, _) => _placeholder(context),
+      );
+    }
+    if (!circular) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox.expand(child: child),
       );
     }
     return ClipOval(

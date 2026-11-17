@@ -1,14 +1,16 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../screens/exploration/exploration_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../widgets/connection_banner.dart';
 import 'app_scope.dart';
 
 /// Área do Candidato, com a barra inferior de quatro separadores (9.1).
 ///
-/// Os separadores «Explorar», «Matches» e «Conversas» chegam com as Issues
-/// seguintes (I076 e I078); o separador «Perfil» mostra o perfil do Candidato
-/// (M05), com acesso aos ecrãs M06 a M08 e à conta (M20).
+/// O separador «Explorar» mostra a exploração de vagas (M09 a M11); os
+/// separadores «Matches» e «Conversas» chegam com a I078; o separador «Perfil»
+/// mostra o perfil do Candidato (M05), com acesso aos ecrãs M06 a M08 e à
+/// conta (M20).
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -35,7 +37,7 @@ class _HomeShellState extends State<HomeShell> {
             child: IndexedStack(
               index: _selectedIndex,
               children: const [
-                _PendingArea(),
+                ExplorationScreen(),
                 _PendingArea(),
                 _PendingArea(),
                 ProfileScreen(),

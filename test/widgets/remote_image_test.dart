@@ -60,4 +60,34 @@ void main() {
     expect(find.byType(Image), findsNothing);
     expect(find.byKey(const Key('remote-image-placeholder')), findsOneWidget);
   });
+
+  testWidgets('a fotografia retangular ocupa o espaço dado (I076)', (
+    tester,
+  ) async {
+    final app = TestApp();
+    await app.session.start(candidateLogin(token: 'abc'));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 120,
+            height: 90,
+            child: RemoteImage(
+              url: '/api/files/job-photo/a.jpg',
+              baseUrl: 'https://api.test',
+              credentials: app.session,
+              circular: false,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(ClipOval), findsNothing);
+    expect(find.byType(ClipRRect), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('remote-image'))),
+      const Size(120, 90),
+    );
+  });
 }
