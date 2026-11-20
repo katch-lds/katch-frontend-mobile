@@ -18,6 +18,7 @@ class ReferenceDataStore extends ChangeNotifier {
   List<ReferenceItemDto> _locations = const [];
   LoadStatus _status = LoadStatus.idle;
   ApiException? _error;
+  Future<void> _locationsRequest = Future.value();
 
   List<ReferenceItemDto> get locations => _locations;
 
@@ -28,6 +29,7 @@ class ReferenceDataStore extends ChangeNotifier {
   List<ReferenceItemDto> _skills = const [];
   LoadStatus _skillsStatus = LoadStatus.idle;
   ApiException? _skillsError;
+  Future<void> _skillsRequest = Future.value();
 
   List<ReferenceItemDto> get skills => _skills;
 
@@ -35,14 +37,24 @@ class ReferenceDataStore extends ChangeNotifier {
 
   ApiException? get skillsError => _skillsError;
 
-  /// Pede a lista de localidades, uma vez; depois de uma falha, volta a pedir.
-  Future<void> loadLocations() async {
-    if (_status == LoadStatus.loading || _status == LoadStatus.loaded) {
-      return;
+  /// Pede a lista de localidades, uma vez; quem pede durante o pedido em
+  /// curso espera por ele; depois de uma falha, volta a pedir.
+  Future<void> loadLocations() {
+    switch (_status) {
+      case LoadStatus.loaded:
+        return Future.value();
+      case LoadStatus.loading:
+        return _locationsRequest;
+      case LoadStatus.idle || LoadStatus.failed:
+        _status = LoadStatus.loading;
+        _error = null;
+        _locationsRequest = _fetchLocations();
+        notifyListeners();
+        return _locationsRequest;
     }
-    _status = LoadStatus.loading;
-    _error = null;
-    notifyListeners();
+  }
+
+  Future<void> _fetchLocations() async {
     try {
       _locations = List.unmodifiable(await _service.listLocations());
       _status = LoadStatus.loaded;
@@ -53,16 +65,24 @@ class ReferenceDataStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Pede a lista de competências, uma vez; depois de uma falha, volta a
-  /// pedir (RF008).
-  Future<void> loadSkills() async {
-    if (_skillsStatus == LoadStatus.loading ||
-        _skillsStatus == LoadStatus.loaded) {
-      return;
+  /// Pede a lista de competências, uma vez; quem pede durante o pedido em
+  /// curso espera por ele; depois de uma falha, volta a pedir (RF008).
+  Future<void> loadSkills() {
+    switch (_skillsStatus) {
+      case LoadStatus.loaded:
+        return Future.value();
+      case LoadStatus.loading:
+        return _skillsRequest;
+      case LoadStatus.idle || LoadStatus.failed:
+        _skillsStatus = LoadStatus.loading;
+        _skillsError = null;
+        _skillsRequest = _fetchSkills();
+        notifyListeners();
+        return _skillsRequest;
     }
-    _skillsStatus = LoadStatus.loading;
-    _skillsError = null;
-    notifyListeners();
+  }
+
+  Future<void> _fetchSkills() async {
     try {
       _skills = List.unmodifiable(await _service.listSkills());
       _skillsStatus = LoadStatus.loaded;

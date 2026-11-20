@@ -308,9 +308,13 @@ class FakeCandidateProfileService implements CandidateProfileService {
     return profile;
   }
 
+  /// Se existir, o `getProfile` só responde depois de ser completado.
+  Completer<void>? profileGate;
+
   @override
   Future<CandidateProfileDto> getProfile() async {
     await _call('getProfile');
+    await profileGate?.future;
     return profile;
   }
 

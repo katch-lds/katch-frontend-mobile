@@ -28,6 +28,10 @@ class ProfileStore extends SessionScopedStore {
   /// de sessão.
   int _generation = 0;
 
+  /// Último pedido do perfil, a que se junta quem chega com `status` em
+  /// `loading`.
+  Future<void> _request = Future.value();
+
   CandidateProfileDto? get profile => _profile;
 
   String? get photoUrl => _profile?.photoUrl;
@@ -38,20 +42,26 @@ class ProfileStore extends SessionScopedStore {
 
   ApiException? get error => _error;
 
-  /// Pede o perfil, uma vez; depois de uma falha, volta a pedir.
-  Future<void> load() async {
-    if (_status == LoadStatus.loading || _status == LoadStatus.loaded) {
-      return;
-    }
-    await refresh();
+  /// Pede o perfil, uma vez; quem pede durante o pedido em curso espera por
+  /// ele; depois de uma falha, volta a pedir.
+  Future<void> load() {
+    return switch (_status) {
+      LoadStatus.loaded => Future.value(),
+      LoadStatus.loading => _request,
+      _ => refresh(),
+    };
   }
 
   /// Volta a pedir o perfil ao servidor.
-  Future<void> refresh() async {
-    final generation = _generation;
+  Future<void> refresh() {
     _status = LoadStatus.loading;
     _error = null;
+    _request = _fetch(_generation);
     notifyListeners();
+    return _request;
+  }
+
+  Future<void> _fetch(int generation) async {
     try {
       final profile = await _service.getProfile();
       if (generation != _generation) {
