@@ -61,6 +61,7 @@ class AppDependencies {
     final api = HttpApiClient(
       baseUrl: config.apiBaseUrl,
       requestTimeout: config.requestTimeout,
+      uploadTimeout: config.uploadTimeout,
       credentials: session,
       monitor: monitor,
       client: client,

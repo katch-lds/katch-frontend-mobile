@@ -2,7 +2,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../core/credential_provider.dart';
 import '../core/http_api_client.dart';
-import '../core/url.dart';
 
 /// Fotografia ou logótipo servido por um URL da API.
 ///
@@ -44,7 +43,7 @@ class RemoteImage extends StatelessWidget {
       child = _placeholder(context);
     } else {
       child = Image.network(
-        '${trimTrailingSlashes(baseUrl)}$path',
+        '$baseUrl$path',
         key: const Key('remote-image'),
         width: circular ? size : null,
         height: circular ? size : null,

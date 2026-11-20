@@ -10,19 +10,21 @@ import 'api_client.dart';
 import 'api_exception.dart';
 import 'connection_monitor.dart';
 import 'credential_provider.dart';
-import 'url.dart';
 
 /// Cliente da API v02 sobre HTTPS e JSON.
+///
+/// O [baseUrl] vem do `AppConfig`, já sem a barra final; o envio de ficheiros
+/// usa o [uploadTimeout] e os restantes pedidos o [requestTimeout].
 class HttpApiClient implements ApiClient {
   HttpApiClient({
     required String baseUrl,
     required Duration requestTimeout,
+    required Duration uploadTimeout,
     required CredentialProvider credentials,
     required ConnectionMonitor monitor,
-    Duration uploadTimeout = defaultUploadTimeout,
     http.Client? client,
     void Function(String message)? log,
-  }) : _baseUrl = trimTrailingSlashes(baseUrl),
+  }) : _baseUrl = baseUrl,
        _requestTimeout = requestTimeout,
        _uploadTimeout = uploadTimeout,
        _credentials = credentials,
@@ -35,11 +37,6 @@ class HttpApiClient implements ApiClient {
 
   /// Campo do pedido `multipart/form-data` com o ficheiro (API v02, 2.6).
   static const uploadField = 'file';
-
-  /// Tempo limite do envio de um ficheiro (fotografia ou curriculum vitae,
-  /// até 5 MiB): o envio inteiro numa ligação móvel lenta pode passar os 9 s
-  /// dos restantes pedidos (RNF014). Uma ligação recusada falha logo.
-  static const defaultUploadTimeout = Duration(seconds: 60);
 
   /// Pedido de início de sessão, cujos erros chegam como `ApiRejection`.
   static const loginPath = '/api/auth/login';

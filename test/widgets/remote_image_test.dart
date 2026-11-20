@@ -28,7 +28,7 @@ void main() {
       MaterialApp(
         home: RemoteImage(
           url: '/api/files/profile-photo/a.jpg',
-          baseUrl: 'https://api.test/',
+          baseUrl: 'https://api.test',
           credentials: app.session,
         ),
       ),
