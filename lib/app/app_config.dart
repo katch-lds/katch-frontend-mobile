@@ -1,9 +1,11 @@
 import '../core/url.dart';
 
-/// Configuração por ambiente da aplicação (I120), sem segredos.
+/// Configuração por ambiente da aplicação, sem segredos.
 ///
-/// O endereço da API vem de `--dart-define=API_BASE_URL=...` no build. Por
-/// omissão, é a API local vista a partir do emulador Android (10.0.2.2).
+/// Recebe o endereço da API por `--dart-define=API_BASE_URL=<url>` no build e
+/// no `flutter run`; sem valor, usa a API local vista a partir do emulador
+/// Android (10.0.2.2). Devolve, em [AppConfig.fromEnvironment], o endereço sem
+/// a barra final e o tempo limite dos pedidos.
 class AppConfig {
   const AppConfig({required this.apiBaseUrl, required this.requestTimeout});
 

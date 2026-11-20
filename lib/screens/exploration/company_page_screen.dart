@@ -12,7 +12,7 @@ import '../../widgets/load_state_view.dart';
 import '../../widgets/photo_grid.dart';
 import '../../widgets/remote_image.dart';
 
-/// Página de apresentação da Empresa, M13 (modelo de classes, 9.3; RF017).
+/// Página de apresentação da Empresa, M13 (RF017).
 ///
 /// Designação, logótipo, descrição, sítio na Internet e galeria. Os contactos
 /// da Empresa só são dados depois do match (RF025).

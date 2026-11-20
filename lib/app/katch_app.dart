@@ -6,7 +6,7 @@ import 'app_dependencies.dart';
 import 'app_scope.dart';
 import 'auth_gate.dart';
 
-/// Raiz da aplicação móvel do Candidato (modelo de classes, 9.2).
+/// Raiz da aplicação móvel do Candidato.
 ///
 /// Quando a sessão deixa de estar iniciada (fim de sessão, expiração ou
 /// credencial recusada), fecha os ecrãs abertos por cima da área do

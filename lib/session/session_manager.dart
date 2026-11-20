@@ -11,7 +11,7 @@ import 'session.dart';
 import 'session_status.dart';
 import 'session_storage.dart';
 
-/// Guarda, restaura e termina a sessão do Candidato (modelo de classes, 6).
+/// Guarda, restaura e termina a sessão do Candidato.
 ///
 /// A credencial fica no armazenamento seguro (`SessionStorage`) e é dada ao
 /// `HttpApiClient` através de `CredentialProvider`. A expiração (8 horas,

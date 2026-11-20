@@ -4,7 +4,7 @@ import '../core/api_exception.dart';
 import '../services/auth_service.dart';
 import '../session/session_manager.dart';
 
-/// Estado do ecrã «Conta», M20 (modelo de classes, 8.2).
+/// Estado do ecrã «Conta», M20.
 ///
 /// `signOut()` pede o fim de sessão ao servidor, sem depender do resultado, e
 /// termina a sessão local: o cliente descarta a credencial e passa a exigir

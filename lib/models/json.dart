@@ -1,2 +1,2 @@
-/// Objeto JSON já descodificado (modelo de classes do mobile v02, 2.2).
+/// Objeto JSON já descodificado.
 typedef Json = Map<String, Object?>;

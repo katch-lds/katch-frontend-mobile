@@ -5,7 +5,7 @@ import '../models/reference_item_dto.dart';
 import '../services/reference_list_service.dart';
 import 'load_status.dart';
 
-/// Listas pré-definidas partilhadas entre ecrãs (modelo de classes, 8.1).
+/// Listas pré-definidas partilhadas entre ecrãs.
 ///
 /// Não é de âmbito de sessão: a lista de localidades é precisa no registo,
 /// antes do início de sessão (API v02, 6.13.1). A lista de competências exige

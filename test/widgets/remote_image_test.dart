@@ -61,9 +61,7 @@ void main() {
     expect(find.byKey(const Key('remote-image-placeholder')), findsOneWidget);
   });
 
-  testWidgets('a fotografia retangular ocupa o espaço dado (I076)', (
-    tester,
-  ) async {
+  testWidgets('a fotografia retangular ocupa o espaço dado', (tester) async {
     final app = TestApp();
     await app.session.start(candidateLogin(token: 'abc'));
     await tester.pumpWidget(

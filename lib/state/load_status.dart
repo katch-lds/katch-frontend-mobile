@@ -1,2 +1,2 @@
-/// Estado de um carregamento ou de uma submissão (modelo de classes, 8.1).
+/// Estado de um carregamento ou de uma submissão.
 enum LoadStatus { idle, loading, loaded, failed }

@@ -1,11 +1,17 @@
-// Gera ou verifica o teste que importa todos os ficheiros de lib/ (I075).
-//
-// O `flutter test --coverage` só regista os ficheiros carregados por algum
-// teste: sem este teste, um ficheiro que nenhum teste importa não conta como
-// não coberto (plano de testes do frontend mobile, secção 10).
-//
-//   dart run tool/coverage_all_files.dart          gera o teste
-//   dart run tool/coverage_all_files.dart --check  verifica-o (pipeline)
+/// Gera ou verifica o teste que importa todos os ficheiros de lib/.
+///
+/// O `flutter test --coverage` só regista os ficheiros carregados por algum
+/// teste: sem este teste, um ficheiro que nenhum teste importa não conta como
+/// não coberto (plano de testes do frontend mobile, secção 10).
+///
+/// Argumentos: sem argumentos, gera `test/coverage_all_files_test.dart`; com
+/// `--check`, só verifica que está atualizado (pipeline).
+///
+///     dart run tool/coverage_all_files.dart [--check]
+///
+/// Devolve o código de saída 0, ou 1 se o teste gerado estiver desatualizado.
+library;
+
 import 'dart:io';
 
 import 'coverage_scope.dart';

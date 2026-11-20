@@ -1,6 +1,6 @@
 import 'api_error_dto.dart';
 
-/// Motivo de rejeição por campo de um formulário (modelo de classes, 3.4).
+/// Motivo de rejeição por campo de um formulário.
 ///
 /// Junta os motivos da validação local e os devolvidos pela API
 /// (`ApiErrorDto.fields`), para cada ecrã os mostrar junto do campo.

@@ -1,4 +1,4 @@
-/// Data e hora atuais em UTC (modelo de classes do mobile v02, 4.2).
+/// Data e hora atuais em UTC.
 ///
 /// Nos testes é substituído por um relógio fixo, para verificar a expiração
 /// da sessão (RNF005, P20).

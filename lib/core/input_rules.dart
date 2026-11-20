@@ -1,6 +1,6 @@
 import '../models/file_selection.dart';
 
-/// Regras de validação local (modelo de classes do mobile v02, secção 4.2).
+/// Regras de validação local.
 ///
 /// Só servem para dar ao Candidato o motivo antes de enviar o pedido: o
 /// servidor aplica as mesmas regras e é a autoridade (RNF008). Os motivos são

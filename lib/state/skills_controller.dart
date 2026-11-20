@@ -13,8 +13,7 @@ import 'load_status.dart';
 import 'profile_store.dart';
 import 'reference_data_store.dart';
 
-/// Estado de M07, competências como etiquetas (modelo de classes, 8.3;
-/// RF008, RF009).
+/// Estado de M07, competências como etiquetas (RF008, RF009).
 ///
 /// O Candidato escolhe da lista pré-definida (`toggle`), acrescenta uma
 /// competência «Outro», validada antes de enviar (P07), ou remove uma

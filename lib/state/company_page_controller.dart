@@ -7,8 +7,7 @@ import '../services/job_exploration_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado de M13, página de apresentação da Empresa (modelo de classes, 8.4;
-/// RF017).
+/// Estado de M13, página de apresentação da Empresa (RF017).
 class CompanyPageController extends ChangeNotifier {
   CompanyPageController({
     required JobExplorationService service,

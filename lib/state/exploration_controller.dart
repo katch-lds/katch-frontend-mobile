@@ -13,7 +13,7 @@ import '../services/job_exploration_service.dart';
 import 'failure_messages.dart';
 import 'profile_store.dart';
 
-/// Estado da área de exploração (modelo de classes, 8.4; DFM-12).
+/// Estado da área de exploração (DFM-12).
 enum ExplorationStatus {
   /// Pedido da quota ou do cartão em curso.
   loading,
@@ -31,7 +31,7 @@ enum ExplorationStatus {
   failed,
 }
 
-/// Estado dos ecrãs M09, M10 e M11 (modelo de classes, 8.4; UC05).
+/// Estado dos ecrãs M09, M10 e M11 (UC05).
 ///
 /// Pede a quota e o cartão seguinte, recusa a vaga ou manifesta interesse e
 /// volta a pedir os cartões quando as preferências de procura do

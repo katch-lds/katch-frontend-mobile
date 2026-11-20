@@ -1,9 +1,13 @@
 /// Âmbito da cobertura de linhas do frontend mobile (plano de testes do
 /// frontend mobile, secção 10).
+///
+/// Biblioteca sem argumentos de linha de comandos, usada por
+/// `coverage_all_files.dart` e `filter_lcov.dart`.
 library;
 
-/// Ficheiros de `lib/` excluídos da cobertura: os gerados automaticamente e o
-/// arranque da aplicação (`lib/main.dart`, verificado pelos testes de sistema).
+/// Indica se o ficheiro [path] de `lib/` fica fora da cobertura: os gerados
+/// automaticamente e o arranque da aplicação (`lib/main.dart`, verificado pelos
+/// testes de sistema).
 bool isExcludedFromCoverage(String path) {
   final file = normalizePath(path);
   return file == 'lib/main.dart' ||
@@ -12,7 +16,7 @@ bool isExcludedFromCoverage(String path) {
       file.endsWith('.freezed.dart');
 }
 
-/// Caminho relativo à raiz do pacote, com `/`, a partir de `lib/`.
+/// Devolve [path] relativo à raiz do pacote, com `/`, a partir de `lib/`.
 String normalizePath(String path) {
   final file = path.replaceAll(r'\', '/');
   if (file.startsWith('lib/')) {

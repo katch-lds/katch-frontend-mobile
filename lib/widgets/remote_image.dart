@@ -4,7 +4,7 @@ import '../core/credential_provider.dart';
 import '../core/http_api_client.dart';
 import '../core/url.dart';
 
-/// Fotografia ou logótipo servido por um URL da API (modelo de classes, 9.4).
+/// Fotografia ou logótipo servido por um URL da API.
 ///
 /// Os URL `/api/files/{kind}/{fileName}` só servem o ficheiro com credencial
 /// (API v02, 6.9.1), pelo que o pedido leva o cabeçalho de autorização. A

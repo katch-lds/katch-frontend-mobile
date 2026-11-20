@@ -1,6 +1,6 @@
 /// Retira as barras finais de um endereço, sem expressões regulares.
 ///
-/// Igual ao `trimTrailingSlashes` do frontend web (I120): um ciclo em vez de
+/// Igual ao `trimTrailingSlashes` do frontend web: um ciclo em vez de
 /// `RegExp(r'/+$')`, que tem retrocesso super-linear (regra S8786 do
 /// SonarQube).
 String trimTrailingSlashes(String url) {

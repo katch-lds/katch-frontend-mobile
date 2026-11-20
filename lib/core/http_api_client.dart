@@ -12,7 +12,7 @@ import 'connection_monitor.dart';
 import 'credential_provider.dart';
 import 'url.dart';
 
-/// Cliente da API v02 sobre HTTPS e JSON (modelo de classes, secção 4.1).
+/// Cliente da API v02 sobre HTTPS e JSON.
 class HttpApiClient implements ApiClient {
   HttpApiClient({
     required String baseUrl,

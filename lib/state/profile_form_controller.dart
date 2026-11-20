@@ -12,7 +12,7 @@ import 'load_status.dart';
 import 'profile_store.dart';
 import 'reference_data_store.dart';
 
-/// Estado dos dados do perfil em M05 (modelo de classes, 8.3; RF006).
+/// Estado dos dados do perfil em M05 (RF006).
 ///
 /// Função pretendida, localidade (da lista), disponibilidade e resumo da
 /// experiência, com o contador «n/1000». Valida os limites (P08) antes de

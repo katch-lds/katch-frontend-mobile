@@ -11,10 +11,10 @@ import 'failure_messages.dart';
 import 'load_status.dart';
 import 'reference_data_store.dart';
 
-/// Passo do registo (modelo de classes, 8.2).
+/// Passo do registo.
 enum RegistrationStep { editing, completed }
 
-/// Estado do registo do Candidato, M02 a M04 (modelo de classes, 8.2).
+/// Estado do registo do Candidato, M02 a M04.
 ///
 /// Valida localmente os campos (`InputRules`) e, só depois, envia o pedido. Os
 /// motivos do servidor, por campo, também vão para `errors` (RF004). Em caso de

@@ -8,7 +8,7 @@ import '../services/auth_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado da alteração da palavra-passe, M21 (modelo de classes, 8.2).
+/// Estado da alteração da palavra-passe, M21.
 ///
 /// A palavra-passe nova tem de cumprir o P05, ser diferente da atual e
 /// coincidir com a confirmação, que só existe no cliente. O servidor rejeita

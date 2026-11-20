@@ -10,7 +10,7 @@ import 'failure_messages.dart';
 import 'load_status.dart';
 import 'profile_store.dart';
 
-/// Estado de M08, preferências de procura (modelo de classes, 8.3; RF007).
+/// Estado de M08, preferências de procura (RF007).
 ///
 /// Distância máxima (1 a 500 km, P06), pretensão salarial mínima, regimes de
 /// trabalho e tipos de contrato. Um campo vazio ou nenhuma opção escolhida

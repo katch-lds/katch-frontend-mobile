@@ -13,7 +13,7 @@ import '../profile/preferences_screen.dart';
 import 'job_detail_screen.dart';
 
 /// Exploração de vagas, M09, com os estados M10 (quota esgotada) e M11 (sem
-/// vagas) (modelo de classes, 8.4 e 9.1; UC05).
+/// vagas), do UC05.
 class ExplorationScreen extends StatefulWidget {
   const ExplorationScreen({super.key});
 

@@ -6,7 +6,7 @@ import 'job_formats.dart';
 import 'photo_grid.dart';
 import 'remote_image.dart';
 
-/// Cartão de vaga de M09 e M10 (modelo de classes, 9.4; RF013, RNF010).
+/// Cartão de vaga de M09 e M10 (RF013, RNF010).
 ///
 /// Recusar, manifestar interesse e ver o detalhe são botões do cartão; recusar
 /// e manifestar interesse também se fazem deslizando o cartão para a esquerda

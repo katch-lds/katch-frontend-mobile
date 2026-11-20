@@ -6,7 +6,7 @@ import '../services/job_exploration_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado de M12, detalhe da vaga (modelo de classes, 8.4; RF016).
+/// Estado de M12, detalhe da vaga (RF016).
 class JobDetailController extends ChangeNotifier {
   JobDetailController({required JobExplorationService service})
     : _service = service;

@@ -23,7 +23,7 @@ import '../state/profile_store.dart';
 import '../state/reference_data_store.dart';
 import 'app_config.dart';
 
-/// Composição das dependências da aplicação (modelo de classes, 10.1).
+/// Composição das dependências da aplicação.
 ///
 /// Os ecrãs obtêm-nas através do `AppScope`. Nos testes, o construtor recebe
 /// serviços simulados, um armazenamento da sessão em memória e um seletor de

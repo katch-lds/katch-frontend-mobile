@@ -1,6 +1,6 @@
 import '../core/api_exception.dart';
 
-/// Mensagem a apresentar para uma falha de um pedido (modelo de classes, 8).
+/// Mensagem a apresentar para uma falha de um pedido.
 ///
 /// `ApiRejection` mostra o motivo devolvido pela API, sem o alterar; a falha
 /// de ligação mostra a indicação do RNF014; os restantes erros mostram uma

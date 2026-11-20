@@ -11,7 +11,7 @@ import '../../widgets/job_card_view.dart';
 import '../../widgets/load_state_view.dart';
 import 'company_page_screen.dart';
 
-/// Detalhe da vaga, M12 (modelo de classes, 9.3; RF016).
+/// Detalhe da vaga, M12 (RF016).
 ///
 /// Mostra os dados do cartão, a descrição completa, as competências e os
 /// benefícios, e abre a página de apresentação da Empresa (RF017).
