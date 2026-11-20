@@ -71,7 +71,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
   }
 
   void _addCustom() {
-    if (_controller.addCustom()) {
+    if (_controller.addCustom(_customLabel.text)) {
       _customLabel.clear();
     }
   }
@@ -170,7 +170,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
                 helperMaxLines: 2,
                 errorText: errors.reasonFor(SkillsController.labelField),
               ),
-              onChanged: (value) => _controller.customLabel = value,
+              onChanged: (_) => _controller.customLabelChanged(),
               onSubmitted: (_) => _addCustom(),
             ),
             const SizedBox(height: 8),

@@ -229,17 +229,20 @@ class ExplorationController extends SafeChangeNotifier {
 
   Future<void> _fetch(int generation, {required bool withQuota}) async {
     try {
-      final results = await Future.wait<Object?>([
-        if (withQuota) _service.getQuota(),
-        _service.getNextCard(),
-      ]);
+      // Os dois pedidos seguem em paralelo (RNF002); a primeira falha é a
+      // indicada, depois de ambos terminarem.
+      final quota = withQuota ? _service.getQuota() : null;
+      final card = _service.getNextCard();
+      await Future.wait([?quota, card]);
+      final nextQuota = await quota;
+      final nextCard = await card;
       if (generation != _generation) {
         return;
       }
-      if (withQuota) {
-        _quota = results.first as QuotaDto?;
+      if (quota != null) {
+        _quota = nextQuota;
       }
-      _card = results.last as JobCardDto?;
+      _card = nextCard;
     } on ApiException catch (failure) {
       if (generation != _generation) {
         return;

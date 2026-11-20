@@ -43,7 +43,6 @@ class SkillsController extends SafeChangeNotifier {
   List<ReferenceItemDto> _selected = [];
   List<CustomSkillDto> _selectedCustom = [];
   bool _customEnabled = false;
-  String _customLabel = '';
   FieldErrors _errors = FieldErrors();
   LoadStatus _loadStatus = LoadStatus.idle;
   LoadStatus _status = LoadStatus.idle;
@@ -64,8 +63,6 @@ class SkillsController extends SafeChangeNotifier {
   /// O campo da competência «Outro» está visível.
   bool get customEnabled => _customEnabled;
 
-  String get customLabel => _customLabel;
-
   FieldErrors get errors => _errors;
 
   LoadStatus get loadStatus => _loadStatus;
@@ -74,8 +71,8 @@ class SkillsController extends SafeChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  set customLabel(String value) {
-    _customLabel = value;
+  /// O texto da competência «Outro» mudou: o motivo anterior deixa de valer.
+  void customLabelChanged() {
     _errors.remove(labelField);
     notifyListeners();
   }
@@ -115,16 +112,15 @@ class SkillsController extends SafeChangeNotifier {
   void showCustom(bool enabled) {
     _customEnabled = enabled;
     if (!enabled) {
-      _customLabel = '';
       _errors.remove(labelField);
     }
     notifyListeners();
   }
 
-  /// Acrescenta a competência «Outro», se cumprir o P07; devolve `true` se a
-  /// acrescentou.
-  bool addCustom() {
-    final label = _customLabel.trim();
+  /// Acrescenta a competência «Outro» [text], se cumprir o P07; devolve `true`
+  /// se a acrescentou.
+  bool addCustom(String text) {
+    final label = text.trim();
     final String? reason;
     if (!InputRules.isValidCustomSkill(label)) {
       reason = InputRules.customSkillReason;
@@ -141,7 +137,6 @@ class SkillsController extends SafeChangeNotifier {
       return false;
     }
     _selectedCustom.add(CustomSkillDto(customSkillId: '', label: label));
-    _customLabel = '';
     _customEnabled = false;
     _errors.remove(labelField);
     notifyListeners();
