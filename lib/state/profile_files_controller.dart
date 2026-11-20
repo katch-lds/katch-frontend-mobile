@@ -10,6 +10,7 @@ import '../services/candidate_profile_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 import 'profile_store.dart';
+import 'safe_change_notifier.dart';
 
 /// Hiperligação em edição em M06, com uma chave estável para o ecrã.
 final class LinkDraft {
@@ -25,7 +26,7 @@ final class LinkDraft {
 /// Valida localmente o formato e a dimensão dos ficheiros (P01, P02) e os
 /// endereços (P10) **antes do primeiro pedido**; depois envia a fotografia, o
 /// CV e as hiperligações, por esta ordem, e volta a pedir o perfil.
-class ProfileFilesController extends ChangeNotifier {
+class ProfileFilesController extends SafeChangeNotifier {
   ProfileFilesController({
     required CandidateProfileService service,
     required ProfileStore profile,
@@ -55,7 +56,6 @@ class ProfileFilesController extends ChangeNotifier {
   FieldErrors _errors = FieldErrors();
   LoadStatus _status = LoadStatus.idle;
   String? _errorMessage;
-  bool _disposed = false;
 
   /// Fotografia escolhida e ainda por enviar.
   FileSelection? get photo => _photo;
@@ -79,7 +79,7 @@ class ProfileFilesController extends ChangeNotifier {
       for (final url in _profile.profile?.links ?? const <String>[])
         LinkDraft(_nextKey++, url),
     ];
-    _notify();
+    notifyListeners();
   }
 
   /// Escolhe a fotografia e indica logo o motivo, se não for aceite (P01).
@@ -107,25 +107,25 @@ class ProfileFilesController extends ChangeNotifier {
   bool addLink() {
     if (_links.length >= InputRules.maxLinks) {
       _errors.add(linksField, InputRules.tooManyLinksReason);
-      _notify();
+      notifyListeners();
       return false;
     }
     _links.add(LinkDraft(_nextKey++, ''));
     _errors.remove(linksField);
-    _notify();
+    notifyListeners();
     return true;
   }
 
   void setLink(int index, String url) {
     _links[index].url = url;
     _errors.remove(linkField(index));
-    _notify();
+    notifyListeners();
   }
 
   void removeLink(int index) {
     _links.removeAt(index);
     _clearLinkErrors();
-    _notify();
+    notifyListeners();
   }
 
   bool validate() {
@@ -160,7 +160,7 @@ class ProfileFilesController extends ChangeNotifier {
       }
     }
     _errors = errors;
-    _notify();
+    notifyListeners();
     return errors.isEmpty;
   }
 
@@ -172,7 +172,7 @@ class ProfileFilesController extends ChangeNotifier {
     }
     _status = LoadStatus.loading;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     var uploaded = false;
     var saved = false;
     try {
@@ -208,7 +208,7 @@ class ProfileFilesController extends ChangeNotifier {
     if (uploaded) {
       await _profile.refresh();
     }
-    _notify();
+    notifyListeners();
     return saved;
   }
 
@@ -245,18 +245,6 @@ class ProfileFilesController extends ChangeNotifier {
     if (reason != null) {
       _errors.add(field, reason);
     }
-    _notify();
-  }
-
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
+    notifyListeners();
   }
 }

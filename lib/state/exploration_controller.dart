@@ -12,6 +12,7 @@ import '../polling/app_lifecycle_monitor.dart';
 import '../services/job_exploration_service.dart';
 import 'failure_messages.dart';
 import 'profile_store.dart';
+import 'safe_change_notifier.dart';
 
 /// Estado da área de exploração (DFM-12).
 enum ExplorationStatus {
@@ -39,7 +40,7 @@ enum ExplorationStatus {
 /// (DFM-15). Com a quota esgotada, conta o tempo até ao fim do bloqueio com o
 /// `Clock` e, nesse instante, volta a pedir a quota, que o servidor já repôs
 /// (RF021).
-class ExplorationController extends ChangeNotifier {
+class ExplorationController extends SafeChangeNotifier {
   ExplorationController({
     required JobExplorationService service,
     required ProfileStore profile,
@@ -78,7 +79,6 @@ class ExplorationController extends ChangeNotifier {
   bool _loading = false;
   bool _failed = false;
   bool _refreshingQuota = false;
-  bool _disposed = false;
   Timer? _countdown;
 
   /// Aumenta em cada pedido de cartões, para ignorar respostas antigas.
@@ -156,7 +156,7 @@ class ExplorationController extends ChangeNotifier {
     _refreshingQuota = true;
     try {
       final quota = await _service.getQuota();
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _quota = quota;
@@ -166,7 +166,7 @@ class ExplorationController extends ChangeNotifier {
       _refreshingQuota = false;
     }
     _syncCountdown();
-    _notify();
+    notifyListeners();
   }
 
   /// Envia a resposta à vaga do cartão; o cartão deixa de ser apresentado
@@ -223,7 +223,7 @@ class ExplorationController extends ChangeNotifier {
     _failed = false;
     _card = null;
     _message = null;
-    _notify();
+    notifyListeners();
     return ++_generation;
   }
 
@@ -254,7 +254,7 @@ class ExplorationController extends ChangeNotifier {
   void _finish() {
     _loading = false;
     _syncCountdown();
-    _notify();
+    notifyListeners();
   }
 
   /// Agenda a próxima atualização do tempo em falta, ou o pedido da quota no
@@ -264,7 +264,7 @@ class ExplorationController extends ChangeNotifier {
     _countdown?.cancel();
     _countdown = null;
     final remaining = remainingBlock;
-    if (remaining == null || _disposed) {
+    if (remaining == null || disposed) {
       return;
     }
     final delay = remaining > Duration.zero && remaining < countdownInterval
@@ -280,7 +280,7 @@ class ExplorationController extends ChangeNotifier {
       return;
     }
     _syncCountdown();
-    _notify();
+    notifyListeners();
   }
 
   /// As preferências gravadas em M08 alteram os cartões seguintes (RF023).
@@ -311,15 +311,8 @@ class ExplorationController extends ChangeNotifier {
         listEquals(a.contractTypes, b.contractTypes);
   }
 
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
   @override
   void dispose() {
-    _disposed = true;
     _countdown?.cancel();
     _profile.removeListener(_onPreferencesChanged);
     _lifecycle.removeListener(_onForeground);

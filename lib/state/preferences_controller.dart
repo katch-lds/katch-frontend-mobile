@@ -1,13 +1,9 @@
-import 'package:flutter/foundation.dart';
-
-import '../core/api_exception.dart';
 import '../core/input_rules.dart';
 import '../models/field_errors.dart';
 import '../models/profile_enums.dart';
 import '../models/search_preferences_dto.dart';
 import '../services/candidate_profile_service.dart';
-import 'failure_messages.dart';
-import 'load_status.dart';
+import 'form_controller.dart';
 import 'profile_store.dart';
 
 /// Estado de M08, preferências de procura (RF007).
@@ -16,7 +12,7 @@ import 'profile_store.dart';
 /// trabalho e tipos de contrato. Um campo vazio ou nenhuma opção escolhida
 /// significa sem filtro. Grava com `updatePreferences` e entrega as novas
 /// preferências ao `ProfileStore`, que a área de exploração observa (RF023).
-class PreferencesController extends ChangeNotifier {
+class PreferencesController extends FormController {
   PreferencesController({
     required CandidateProfileService service,
     required ProfileStore profile,
@@ -36,10 +32,6 @@ class PreferencesController extends ChangeNotifier {
   String _minSalaryText = '';
   final Set<WorkMode> _workModes = {};
   final Set<ContractType> _contractTypes = {};
-  FieldErrors _errors = FieldErrors();
-  LoadStatus _status = LoadStatus.idle;
-  String? _errorMessage;
-  bool _disposed = false;
 
   /// Texto do campo da distância máxima, como o Candidato o escreveu.
   String get maxDistanceText => _maxDistanceText;
@@ -65,17 +57,11 @@ class PreferencesController extends ChangeNotifier {
 
   Set<ContractType> get contractTypes => Set.unmodifiable(_contractTypes);
 
-  FieldErrors get errors => _errors;
-
-  LoadStatus get status => _status;
-
-  String? get errorMessage => _errorMessage;
-
   set maxDistanceText(String value) =>
-      _edit(maxDistanceKmField, () => _maxDistanceText = value);
+      edit(maxDistanceKmField, () => _maxDistanceText = value);
 
   set minSalaryText(String value) =>
-      _edit(minSalaryExpectationField, () => _minSalaryText = value);
+      edit(minSalaryExpectationField, () => _minSalaryText = value);
 
   /// Preenche o formulário com as preferências do perfil.
   void load() {
@@ -88,24 +74,25 @@ class PreferencesController extends ChangeNotifier {
     _contractTypes
       ..clear()
       ..addAll(preferences.contractTypes);
-    _errors = FieldErrors();
-    _notify();
+    errors = FieldErrors();
+    notifyListeners();
   }
 
   void toggleWorkMode(WorkMode mode) {
     if (!_workModes.remove(mode)) {
       _workModes.add(mode);
     }
-    _notify();
+    notifyListeners();
   }
 
   void toggleContractType(ContractType type) {
     if (!_contractTypes.remove(type)) {
       _contractTypes.add(type);
     }
-    _notify();
+    notifyListeners();
   }
 
+  @override
   bool validate() {
     final errors = FieldErrors();
     final distance = maxDistanceKm;
@@ -118,20 +105,12 @@ class PreferencesController extends ChangeNotifier {
         (salary == null || !InputRules.isValidSalary(salary))) {
       errors.add(minSalaryExpectationField, InputRules.salaryReason);
     }
-    _errors = errors;
-    _notify();
-    return errors.isEmpty;
+    return applyValidation(errors);
   }
 
   /// Grava as preferências; devolve `true` em caso de êxito.
-  Future<bool> save() async {
-    if (_status == LoadStatus.loading || !validate()) {
-      return false;
-    }
-    _status = LoadStatus.loading;
-    _errorMessage = null;
-    _notify();
-    try {
+  Future<bool> save() {
+    return send(() async {
       final saved = await _service.updatePreferences(
         SearchPreferencesDto(
           maxDistanceKm: maxDistanceKm,
@@ -147,19 +126,7 @@ class PreferencesController extends ChangeNotifier {
         ),
       );
       _profile.updatePreferences(saved);
-      _status = LoadStatus.loaded;
-      _notify();
-      return true;
-    } on ApiRejection catch (rejection) {
-      _status = LoadStatus.failed;
-      _errors = FieldErrors.fromApi(rejection.error);
-      _errorMessage = rejection.error.message;
-    } on ApiException catch (failure) {
-      _status = LoadStatus.failed;
-      _errorMessage = failureMessage(failure);
-    }
-    _notify();
-    return false;
+    });
   }
 
   /// Valor em euros sem casas decimais desnecessárias («1200» e «1200.5»).
@@ -170,23 +137,5 @@ class PreferencesController extends ChangeNotifier {
     return value == value.roundToDouble()
         ? value.toStringAsFixed(0)
         : value.toString();
-  }
-
-  void _edit(String field, void Function() change) {
-    change();
-    _errors.remove(field);
-    _notify();
-  }
-
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
   }
 }

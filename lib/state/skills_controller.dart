@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../core/api_exception.dart';
 import '../core/input_rules.dart';
 import '../models/candidate_profile_dto.dart';
@@ -12,13 +10,14 @@ import 'failure_messages.dart';
 import 'load_status.dart';
 import 'profile_store.dart';
 import 'reference_data_store.dart';
+import 'safe_change_notifier.dart';
 
 /// Estado de M07, competências como etiquetas (RF008, RF009).
 ///
 /// O Candidato escolhe da lista pré-definida (`toggle`), acrescenta uma
 /// competência «Outro», validada antes de enviar (P07), ou remove uma
 /// etiqueta. `save()` envia só as diferenças em relação ao perfil.
-class SkillsController extends ChangeNotifier {
+class SkillsController extends SafeChangeNotifier {
   SkillsController({
     required CandidateProfileService service,
     required ReferenceDataStore reference,
@@ -49,7 +48,6 @@ class SkillsController extends ChangeNotifier {
   LoadStatus _loadStatus = LoadStatus.idle;
   LoadStatus _status = LoadStatus.idle;
   String? _errorMessage;
-  bool _disposed = false;
 
   /// Competências da lista escolhidas.
   List<ReferenceItemDto> get selected => List.unmodifiable(_selected);
@@ -79,26 +77,26 @@ class SkillsController extends ChangeNotifier {
   set customLabel(String value) {
     _customLabel = value;
     _errors.remove(labelField);
-    _notify();
+    notifyListeners();
   }
 
   /// Carrega o perfil e a lista de competências.
   Future<void> load() async {
     _loadStatus = LoadStatus.loading;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     await Future.wait([_profile.load(), _reference.loadSkills()]);
     final profile = _profile.profile;
     final failure = _profile.error ?? _reference.skillsError;
     if (profile == null || _reference.skillsStatus != LoadStatus.loaded) {
       _loadStatus = LoadStatus.failed;
       _errorMessage = failure == null ? null : failureMessage(failure);
-      _notify();
+      notifyListeners();
       return;
     }
     _syncFrom(profile);
     _loadStatus = LoadStatus.loaded;
-    _notify();
+    notifyListeners();
   }
 
   /// Escolhe ou retira uma competência da lista (RF008).
@@ -110,7 +108,7 @@ class SkillsController extends ChangeNotifier {
       _selected.removeAt(index);
     }
     _errors.remove(skillIdField);
-    _notify();
+    notifyListeners();
   }
 
   /// Mostra ou esconde o campo da opção «Outro» (RF009).
@@ -120,7 +118,7 @@ class SkillsController extends ChangeNotifier {
       _customLabel = '';
       _errors.remove(labelField);
     }
-    _notify();
+    notifyListeners();
   }
 
   /// Acrescenta a competência «Outro», se cumprir o P07; devolve `true` se a
@@ -140,20 +138,20 @@ class SkillsController extends ChangeNotifier {
     if (reason != null) {
       _errors.remove(labelField);
       _errors.add(labelField, reason);
-      _notify();
+      notifyListeners();
       return false;
     }
     _selectedCustom.add(CustomSkillDto(customSkillId: '', label: label));
     _customLabel = '';
     _customEnabled = false;
     _errors.remove(labelField);
-    _notify();
+    notifyListeners();
     return true;
   }
 
   void removeCustom(CustomSkillDto skill) {
     _selectedCustom.remove(skill);
-    _notify();
+    notifyListeners();
   }
 
   /// Envia as diferenças: retira e acrescenta as competências da lista e as
@@ -166,7 +164,7 @@ class SkillsController extends ChangeNotifier {
     _status = LoadStatus.loading;
     _errorMessage = null;
     _errors = FieldErrors();
-    _notify();
+    notifyListeners();
     CandidateProfileDto? latest;
     var removed = false;
     try {
@@ -206,7 +204,7 @@ class SkillsController extends ChangeNotifier {
         _syncFrom(current);
       }
       _status = LoadStatus.loaded;
-      _notify();
+      notifyListeners();
       return true;
     } on ApiRejection catch (rejection) {
       _status = LoadStatus.failed;
@@ -220,7 +218,7 @@ class SkillsController extends ChangeNotifier {
     // pedido e a gravação seguinte só envia as que faltam.
     await _profile.refresh();
     _keepSavedCustomIds();
-    _notify();
+    notifyListeners();
     return false;
   }
 
@@ -243,17 +241,5 @@ class SkillsController extends ChangeNotifier {
   void _syncFrom(CandidateProfileDto profile) {
     _selected = [...profile.skills];
     _selectedCustom = [...profile.customSkills];
-  }
-
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
   }
 }
