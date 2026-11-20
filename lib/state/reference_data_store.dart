@@ -15,81 +15,69 @@ class ReferenceDataStore extends ChangeNotifier {
 
   final ReferenceListService _service;
 
-  List<ReferenceItemDto> _locations = const [];
-  LoadStatus _status = LoadStatus.idle;
-  ApiException? _error;
-  Future<void> _locationsRequest = Future.value();
+  late final _locations = _ReferenceList(
+    _service.listLocations,
+    notifyListeners,
+  );
 
-  List<ReferenceItemDto> get locations => _locations;
+  late final _skills = _ReferenceList(_service.listSkills, notifyListeners);
 
-  LoadStatus get status => _status;
+  List<ReferenceItemDto> get locations => _locations.items;
 
-  ApiException? get error => _error;
+  LoadStatus get status => _locations.status;
 
-  List<ReferenceItemDto> _skills = const [];
-  LoadStatus _skillsStatus = LoadStatus.idle;
-  ApiException? _skillsError;
-  Future<void> _skillsRequest = Future.value();
+  ApiException? get error => _locations.error;
 
-  List<ReferenceItemDto> get skills => _skills;
+  List<ReferenceItemDto> get skills => _skills.items;
 
-  LoadStatus get skillsStatus => _skillsStatus;
+  LoadStatus get skillsStatus => _skills.status;
 
-  ApiException? get skillsError => _skillsError;
+  ApiException? get skillsError => _skills.error;
 
-  /// Pede a lista de localidades, uma vez; quem pede durante o pedido em
-  /// curso espera por ele; depois de uma falha, volta a pedir.
-  Future<void> loadLocations() {
-    switch (_status) {
+  /// Pede a lista de localidades (ver `_ReferenceList.load`).
+  Future<void> loadLocations() => _locations.load();
+
+  /// Pede a lista de competências (RF008; ver `_ReferenceList.load`).
+  Future<void> loadSkills() => _skills.load();
+}
+
+/// Uma lista pré-definida, com o estado e a falha do último pedido.
+class _ReferenceList {
+  _ReferenceList(this._fetch, this._onChange);
+
+  final Future<List<ReferenceItemDto>> Function() _fetch;
+  final VoidCallback _onChange;
+
+  List<ReferenceItemDto> items = const [];
+  LoadStatus status = LoadStatus.idle;
+  ApiException? error;
+  Future<void> _request = Future.value();
+
+  /// Pede a lista, uma vez; quem pede durante o pedido em curso espera por
+  /// ele; depois de uma falha, volta a pedir.
+  Future<void> load() {
+    switch (status) {
       case LoadStatus.loaded:
         return Future.value();
       case LoadStatus.loading:
-        return _locationsRequest;
+        return _request;
       case LoadStatus.idle || LoadStatus.failed:
-        _status = LoadStatus.loading;
-        _error = null;
-        _locationsRequest = _fetchLocations();
-        notifyListeners();
-        return _locationsRequest;
+        status = LoadStatus.loading;
+        error = null;
+        _request = _fetchItems();
+        _onChange();
+        return _request;
     }
   }
 
-  Future<void> _fetchLocations() async {
+  Future<void> _fetchItems() async {
     try {
-      _locations = List.unmodifiable(await _service.listLocations());
-      _status = LoadStatus.loaded;
+      items = List.unmodifiable(await _fetch());
+      status = LoadStatus.loaded;
     } on ApiException catch (failure) {
-      _error = failure;
-      _status = LoadStatus.failed;
+      error = failure;
+      status = LoadStatus.failed;
     }
-    notifyListeners();
-  }
-
-  /// Pede a lista de competências, uma vez; quem pede durante o pedido em
-  /// curso espera por ele; depois de uma falha, volta a pedir (RF008).
-  Future<void> loadSkills() {
-    switch (_skillsStatus) {
-      case LoadStatus.loaded:
-        return Future.value();
-      case LoadStatus.loading:
-        return _skillsRequest;
-      case LoadStatus.idle || LoadStatus.failed:
-        _skillsStatus = LoadStatus.loading;
-        _skillsError = null;
-        _skillsRequest = _fetchSkills();
-        notifyListeners();
-        return _skillsRequest;
-    }
-  }
-
-  Future<void> _fetchSkills() async {
-    try {
-      _skills = List.unmodifiable(await _service.listSkills());
-      _skillsStatus = LoadStatus.loaded;
-    } on ApiException catch (failure) {
-      _skillsError = failure;
-      _skillsStatus = LoadStatus.failed;
-    }
-    notifyListeners();
+    _onChange();
   }
 }

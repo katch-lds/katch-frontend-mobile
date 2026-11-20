@@ -136,8 +136,7 @@ class SkillsController extends SafeChangeNotifier {
       reason = null;
     }
     if (reason != null) {
-      _errors.remove(labelField);
-      _errors.add(labelField, reason);
+      _errors.set(labelField, reason);
       notifyListeners();
       return false;
     }

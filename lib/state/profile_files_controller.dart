@@ -89,7 +89,8 @@ class ProfileFilesController extends SafeChangeNotifier {
       return;
     }
     _photo = file;
-    _setReason(photoField, InputRules.photoError(file));
+    _errors.set(photoField, InputRules.photoError(file));
+    notifyListeners();
   }
 
   /// Escolhe o curriculum vitae e indica logo o motivo, se não for aceite
@@ -100,7 +101,8 @@ class ProfileFilesController extends SafeChangeNotifier {
       return;
     }
     _cv = file;
-    _setReason(cvField, InputRules.cvError(file));
+    _errors.set(cvField, InputRules.cvError(file));
+    notifyListeners();
   }
 
   /// Acrescenta uma hiperligação vazia; a quarta é recusada (P10).
@@ -238,13 +240,5 @@ class ProfileFilesController extends SafeChangeNotifier {
         _errors.remove(field);
       }
     }
-  }
-
-  void _setReason(String field, String? reason) {
-    _errors.remove(field);
-    if (reason != null) {
-      _errors.add(field, reason);
-    }
-    notifyListeners();
   }
 }

@@ -105,4 +105,16 @@ void main() {
     expect(errors.isEmpty, isFalse);
     expect(FieldErrors().isEmpty, isTrue);
   });
+
+  test('FieldErrors.set substitui o motivo e, sem motivo, retira-o', () {
+    final errors = FieldErrors({'email': 'Primeiro.', 'phoneNumber': 'Outro.'});
+
+    errors.set('email', 'Segundo.');
+    expect(errors.reasonFor('email'), 'Segundo.');
+    expect(errors.fields, ['phoneNumber', 'email']);
+
+    errors.set('email', null);
+    expect(errors.reasonFor('email'), isNull);
+    expect(errors.fields, ['phoneNumber']);
+  });
 }

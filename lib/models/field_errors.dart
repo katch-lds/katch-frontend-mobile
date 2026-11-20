@@ -31,5 +31,13 @@ class FieldErrors {
     _reasons.putIfAbsent(field, () => reason);
   }
 
+  /// Substitui o motivo do campo, que passa para o fim; sem [reason], retira-o.
+  void set(String field, String? reason) {
+    _reasons.remove(field);
+    if (reason != null) {
+      _reasons[field] = reason;
+    }
+  }
+
   void remove(String field) => _reasons.remove(field);
 }
