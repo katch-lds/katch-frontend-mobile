@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'job_formats.dart';
 
-/// «Interesses disponíveis: n de 10» (modelo de classes, 9.4; RF022).
+/// «Interesses disponíveis: n de 10» (RF022).
 class QuotaIndicator extends StatelessWidget {
   const QuotaIndicator({
     super.key,
@@ -24,7 +24,7 @@ class QuotaIndicator extends StatelessWidget {
 }
 
 /// Aviso da quota esgotada, com o tempo em falta e o instante da reposição
-/// (modelo de classes, 9.4; RF020).
+/// (RF020).
 class QuotaBlockedNotice extends StatelessWidget {
   const QuotaBlockedNotice({
     super.key,

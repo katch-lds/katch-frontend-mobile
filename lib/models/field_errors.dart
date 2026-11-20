@@ -1,6 +1,6 @@
 import 'api_error_dto.dart';
 
-/// Motivo de rejeição por campo de um formulário (modelo de classes, 3.4).
+/// Motivo de rejeição por campo de um formulário.
 ///
 /// Junta os motivos da validação local e os devolvidos pela API
 /// (`ApiErrorDto.fields`), para cada ecrã os mostrar junto do campo.
@@ -29,6 +29,14 @@ class FieldErrors {
   /// Regista o motivo do campo; o primeiro motivo indicado prevalece.
   void add(String field, String reason) {
     _reasons.putIfAbsent(field, () => reason);
+  }
+
+  /// Substitui o motivo do campo, que passa para o fim; sem [reason], retira-o.
+  void set(String field, String? reason) {
+    _reasons.remove(field);
+    if (reason != null) {
+      _reasons[field] = reason;
+    }
   }
 
   void remove(String field) => _reasons.remove(field);

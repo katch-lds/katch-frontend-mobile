@@ -1,5 +1,10 @@
 import 'package:material_ui/material_ui.dart';
 
+/// Confirmação de uma operação concluída, numa `SnackBar`.
+void showSuccess(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+}
+
 /// Motivo geral da rejeição de um formulário.
 ///
 /// Sem motivo, ocupa um lugar vazio, para os campos do formulário não mudarem

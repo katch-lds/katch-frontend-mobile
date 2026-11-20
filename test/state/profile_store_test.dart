@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katch_mobile/core/api_exception.dart';
 import 'package:katch_mobile/models/search_preferences_dto.dart';
@@ -30,6 +32,23 @@ void main() {
 
     expect(store.status, LoadStatus.loaded);
     expect(store.profile?.fullName, 'Rita Fictícia Moreira');
+    expect(service.calls, ['getProfile']);
+  });
+
+  test('quem pede durante o pedido em curso espera por ele', () async {
+    service.profileGate = Completer<void>();
+    final first = store.load();
+    var waited = true;
+    final second = store.load().then((_) => waited = store.profile != null);
+
+    await pumpEventQueue();
+    expect(store.status, LoadStatus.loading);
+
+    service.profileGate!.complete();
+    await Future.wait([first, second]);
+
+    expect(waited, isTrue);
+    expect(store.status, LoadStatus.loaded);
     expect(service.calls, ['getProfile']);
   });
 

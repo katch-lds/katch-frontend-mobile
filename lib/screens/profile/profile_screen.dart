@@ -6,9 +6,11 @@ import '../../app/app_scope.dart';
 import '../../core/input_rules.dart';
 import '../../models/candidate_profile_dto.dart';
 import '../../models/profile_enums.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/profile_form_controller.dart';
 import '../../state/profile_store.dart';
+import '../../widgets/dropdown_field.dart';
 import '../../widgets/form_message.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/remote_image.dart';
@@ -61,9 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text(ProfileScreen.successMessage)));
+    showSuccess(context, ProfileScreen.successMessage);
   }
 
   void _open(Widget screen) {
@@ -76,27 +76,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       listenable: Listenable.merge([_controller, _store]),
       builder: (context, _) {
         final profile = _store.profile;
-        switch (_controller.loadStatus) {
-          case LoadStatus.idle || LoadStatus.loading:
-            return const LoadStateView.loading();
-          case LoadStatus.failed:
-            return LoadStateView.failed(
-              message: _controller.errorMessage,
-              onRetry: () => unawaited(_controller.load()),
-            );
-          case LoadStatus.loaded:
-            break;
-        }
-        if (profile == null) {
-          return const LoadStateView.loading();
-        }
-        return _buildForm(context, profile);
+        final loaded = _controller.loadStatus == LoadStatus.loaded;
+        return LoadStatusView(
+          failed: _controller.loadStatus == LoadStatus.failed,
+          message: _controller.errorMessage,
+          fallback: profileFailureMessage,
+          onRetry: () => unawaited(_controller.load()),
+          child: loaded && profile != null
+              ? _buildForm(context, profile)
+              : null,
+        );
       },
     );
   }
 
   Widget _buildForm(BuildContext context, CandidateProfileDto profile) {
-    final dependencies = AppScope.of(context);
     final loading = _controller.status == LoadStatus.loading;
     final errors = _controller.errors;
     final skills = [
@@ -114,8 +108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               RemoteImage(
                 key: const Key('profile-photo'),
                 url: profile.photoUrl,
-                baseUrl: dependencies.config.apiBaseUrl,
-                credentials: dependencies.session,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -143,71 +135,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
               errorText: errors.reasonFor(
                 ProfileFormController.desiredRoleField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.desiredRole = value,
           ),
           const SizedBox(height: 16),
-          InputDecorator(
-            decoration: InputDecoration(
-              labelText: 'Localidade',
-              errorText: errors.reasonFor(
-                ProfileFormController.locationIdField,
-              ),
-              border: const OutlineInputBorder(),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                key: const Key('profile-location'),
-                isExpanded: true,
-                isDense: true,
-                value: _controller.locationId,
-                hint: const Text('Selecione a localidade'),
-                items: [
-                  for (final location in _controller.locations)
-                    DropdownMenuItem(
-                      value: location.id,
-                      child: Text(location.name),
-                    ),
-                ],
-                onChanged: loading
-                    ? null
-                    : (value) => _controller.locationId = value,
-              ),
-            ),
+          DropdownField<String>(
+            fieldKey: const Key('profile-location'),
+            label: 'Localidade',
+            error: errors.reasonFor(ProfileFormController.locationIdField),
+            value: _controller.locationId,
+            hint: 'Selecione a localidade',
+            items: [
+              for (final location in _controller.locations)
+                DropdownMenuItem(
+                  value: location.id,
+                  child: Text(location.name),
+                ),
+            ],
+            onChanged: loading
+                ? null
+                : (value) => _controller.locationId = value,
           ),
           const SizedBox(height: 16),
-          InputDecorator(
-            decoration: InputDecoration(
-              labelText: 'Disponibilidade',
-              errorText: errors.reasonFor(
-                ProfileFormController.availabilityField,
+          DropdownField<Availability?>(
+            fieldKey: const Key('profile-availability'),
+            label: 'Disponibilidade',
+            error: errors.reasonFor(ProfileFormController.availabilityField),
+            value: _controller.availability,
+            hint: 'Não indicada',
+            items: [
+              const DropdownMenuItem<Availability?>(
+                child: Text('Não indicada'),
               ),
-              border: const OutlineInputBorder(),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<Availability?>(
-                key: const Key('profile-availability'),
-                isExpanded: true,
-                isDense: true,
-                value: _controller.availability,
-                hint: const Text('Não indicada'),
-                items: [
-                  const DropdownMenuItem<Availability?>(
-                    child: Text('Não indicada'),
-                  ),
-                  for (final availability in Availability.values)
-                    DropdownMenuItem<Availability?>(
-                      value: availability,
-                      child: Text(availability.label),
-                    ),
-                ],
-                onChanged: loading
-                    ? null
-                    : (value) => _controller.availability = value,
-              ),
-            ),
+              for (final availability in Availability.values)
+                DropdownMenuItem<Availability?>(
+                  value: availability,
+                  child: Text(availability.label),
+                ),
+            ],
+            onChanged: loading
+                ? null
+                : (value) => _controller.availability = value,
           ),
           const SizedBox(height: 16),
           TextFormField(
@@ -225,8 +193,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               errorText: errors.reasonFor(
                 ProfileFormController.experienceSummaryField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.experienceSummary = value,
           ),

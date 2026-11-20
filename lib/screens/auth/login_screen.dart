@@ -5,6 +5,7 @@ import '../../state/load_status.dart';
 import '../../state/login_controller.dart';
 import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/save_button.dart';
 import 'register_screen.dart';
 
 /// Ecrã de início de sessão do Candidato, M01 (RF001).
@@ -85,7 +86,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
                             labelText: 'Correio eletrónico',
-                            border: OutlineInputBorder(),
                           ),
                           onChanged: (value) => _controller.email = value,
                         ),
@@ -97,26 +97,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           autofillHints: const [AutofillHints.password],
                           decoration: const InputDecoration(
                             labelText: 'Palavra-passe',
-                            border: OutlineInputBorder(),
                           ),
                           onChanged: (value) => _controller.password = value,
                           onSubmitted: (_) => _controller.submit(),
                         ),
                         FormMessage(message: _controller.errorMessage),
                         const SizedBox(height: 16),
-                        FilledButton(
+                        SaveButton(
                           key: const Key('login-submit'),
+                          loading: loading,
                           onPressed: _controller.canSubmit
                               ? _controller.submit
                               : null,
-                          child: loading
-                              ? const SizedBox.square(
-                                  dimension: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Text('Entrar'),
+                          label: 'Entrar',
                         ),
                         const SizedBox(height: 8),
                         TextButton(

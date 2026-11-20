@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:katch_mobile/core/device_file_picker.dart';
+import 'package:katch_mobile/core/platform_file_picker.dart';
 import 'package:katch_mobile/core/input_rules.dart';
 
 void main() {

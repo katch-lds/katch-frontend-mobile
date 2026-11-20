@@ -6,7 +6,17 @@ import 'app_dependencies.dart';
 import 'app_scope.dart';
 import 'auth_gate.dart';
 
-/// Raiz da aplicação móvel do Candidato (modelo de classes, 9.2).
+/// Tema da aplicação: a cor do Katch e os campos de formulário com contorno,
+/// com o motivo de rejeição em até 3 linhas.
+final katchTheme = ThemeData(
+  colorSchemeSeed: const Color(0xFF3730A3),
+  inputDecorationTheme: const InputDecorationTheme(
+    border: OutlineInputBorder(),
+    errorMaxLines: 3,
+  ),
+);
+
+/// Raiz da aplicação móvel do Candidato.
 ///
 /// Quando a sessão deixa de estar iniciada (fim de sessão, expiração ou
 /// credencial recusada), fecha os ecrãs abertos por cima da área do
@@ -56,7 +66,7 @@ class _KatchAppState extends State<KatchApp> {
       child: MaterialApp(
         navigatorKey: _navigatorKey,
         title: 'Katch',
-        theme: ThemeData(colorSchemeSeed: const Color(0xFF3730A3)),
+        theme: katchTheme,
         home: const AuthGate(),
       ),
     );

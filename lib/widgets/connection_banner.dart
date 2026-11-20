@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/connection_monitor.dart';
 import '../state/failure_messages.dart';
 
-/// Faixa que indica a falha de ligação (RNF014; modelo de classes, 9.2).
+/// Faixa que indica a falha de ligação (RNF014).
 ///
 /// Aparece quando o último pedido não obteve resposta no tempo limite de 9
 /// segundos do `HttpApiClient`, abaixo dos 10 segundos do RNF014, e desaparece

@@ -2,7 +2,7 @@ import '../models/json.dart';
 import '../models/login_response.dart';
 import '../models/user_type.dart';
 
-/// Sessão iniciada no dispositivo (modelo de classes do mobile v02, 6).
+/// Sessão iniciada no dispositivo.
 final class Session {
   const Session({
     required this.token,

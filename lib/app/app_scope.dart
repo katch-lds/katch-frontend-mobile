@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_dependencies.dart';
 
-/// Dá aos ecrãs as dependências da aplicação (modelo de classes, 9.2).
+/// Dá aos ecrãs as dependências da aplicação.
 class AppScope extends InheritedWidget {
   const AppScope({super.key, required this.dependencies, required super.child});
 

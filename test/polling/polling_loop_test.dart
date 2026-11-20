@@ -1,29 +1,36 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katch_mobile/polling/polling_loop.dart';
 
 void main() {
-  test('repete a tarefa, continua depois de uma falha e para', () async {
-    var calls = 0;
-    Future<void> task() async {
-      calls++;
-      if (calls == 1) {
-        throw StateError('sem ligação');
+  test('repete a tarefa, continua depois de uma falha e para', () {
+    fakeAsync((async) {
+      var calls = 0;
+      Future<void> task() async {
+        calls++;
+        if (calls == 1) {
+          throw StateError('sem ligação');
+        }
       }
-    }
 
-    const interval = Duration(milliseconds: 10);
-    final loop = PollingLoop(task, interval: interval);
+      const interval = Duration(seconds: 3);
+      final loop = PollingLoop(task, interval: interval)
+        ..start()
+        ..start();
 
-    loop.start();
-    loop.start();
-    await Future<void>.delayed(const Duration(milliseconds: 45));
-    loop.stop();
-    final afterStop = calls;
-    await Future<void>.delayed(const Duration(milliseconds: 30));
+      async.elapse(Duration.zero);
+      expect(calls, 1);
+      async.elapse(interval);
+      expect(calls, 2);
+      async.elapse(interval);
+      expect(calls, 3);
 
-    expect(afterStop, greaterThanOrEqualTo(3));
-    expect(calls, afterStop);
-    expect(loop.isRunning, isFalse);
+      loop.stop();
+      async.elapse(interval * 3);
+
+      expect(calls, 3);
+      expect(loop.isRunning, isFalse);
+    });
   });
 
   test('o intervalo por omissão é de 3 segundos', () {

@@ -1,6 +1,6 @@
 import '../models/file_selection.dart';
 
-/// Regras de validação local (modelo de classes do mobile v02, secção 4.2).
+/// Regras de validação local.
 ///
 /// Só servem para dar ao Candidato o motivo antes de enviar o pedido: o
 /// servidor aplica as mesmas regras e é a autoridade (RNF008). Os motivos são
@@ -130,9 +130,6 @@ abstract final class InputRules {
   /// Número inteiro de 1 a 500 (P06).
   static bool isValidDistanceKm(int value) =>
       value >= 1 && value <= maxDistanceKm;
-
-  /// Endereço iniciado por `http://` ou `https://` (P10).
-  static bool isValidLink(String value) => linkError(value) == null;
 
   /// Motivo da recusa de uma hiperligação, ou `null`: no máximo 500
   /// caracteres e iniciada por `http://` ou `https://` (P10), pela mesma

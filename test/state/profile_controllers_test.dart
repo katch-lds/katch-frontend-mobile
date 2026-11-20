@@ -391,9 +391,7 @@ void main() {
 
     test('acrescenta «C#» pela opção «Outro» (RF009)', () async {
       controller.showCustom(true);
-      controller.customLabel = ' C# ';
-
-      expect(controller.addCustom(), isTrue);
+      expect(controller.addCustom(' C# '), isTrue);
       expect(controller.customEnabled, isFalse);
       expect(controller.selectedCustom.single.label, 'C#');
 
@@ -404,16 +402,15 @@ void main() {
 
     test('rejeita 41 caracteres e «@» antes de enviar (P07)', () {
       controller.showCustom(true);
-      controller.customLabel = 'A' * 41;
-      expect(controller.addCustom(), isFalse);
+      expect(controller.addCustom('A' * 41), isFalse);
       expect(
         controller.errors.reasonFor(SkillsController.labelField),
         InputRules.customSkillReason,
       );
 
-      controller.customLabel = 'dev@home';
+      controller.customLabelChanged();
       expect(controller.errors.reasonFor(SkillsController.labelField), isNull);
-      expect(controller.addCustom(), isFalse);
+      expect(controller.addCustom('dev@home'), isFalse);
       expect(
         controller.errors.reasonFor(SkillsController.labelField),
         InputRules.customSkillReason,
@@ -423,11 +420,9 @@ void main() {
     });
 
     test('rejeita uma competência «Outro» repetida', () {
-      controller.customLabel = 'C#';
-      controller.addCustom();
-      controller.customLabel = 'c#';
+      controller.addCustom('C#');
 
-      expect(controller.addCustom(), isFalse);
+      expect(controller.addCustom('c#'), isFalse);
       expect(
         controller.errors.reasonFor(SkillsController.labelField),
         SkillsController.alreadyAddedReason,
@@ -448,12 +443,17 @@ void main() {
       expect(store.profile?.customSkills, isEmpty);
     });
 
-    test('esconder o campo «Outro» limpa o texto', () {
+    test('esconder o campo «Outro» retira o motivo', () {
       controller.showCustom(true);
-      controller.customLabel = 'Go';
+      controller.addCustom('@');
+      expect(
+        controller.errors.reasonFor(SkillsController.labelField),
+        InputRules.customSkillReason,
+      );
+
       controller.showCustom(false);
 
-      expect(controller.customLabel, isEmpty);
+      expect(controller.errors.reasonFor(SkillsController.labelField), isNull);
       expect(controller.customEnabled, isFalse);
     });
 
@@ -464,10 +464,8 @@ void main() {
         {'label': SkillsController.alreadyAddedReason},
       );
       controller
-        ..customLabel = 'Go'
-        ..addCustom()
-        ..customLabel = 'Rust'
-        ..addCustom();
+        ..addCustom('Go')
+        ..addCustom('Rust');
 
       expect(await controller.save(), isFalse);
 

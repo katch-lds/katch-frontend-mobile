@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_selector/file_selector.dart';
 
 import '../models/file_selection.dart';
@@ -36,4 +38,16 @@ class PlatformFilePicker implements DeviceFilePicker {
     }
     return readFileSelection(file.path, file.name);
   }
+}
+
+/// Lê a dimensão e os primeiros bytes de um ficheiro local, para a validação
+/// local do formato (`InputRules.photoError` e `cvError`).
+Future<FileSelection> readFileSelection(String path, String name) async {
+  final file = File(path);
+  final size = await file.length();
+  final header = <int>[];
+  await for (final chunk in file.openRead(0, FileSelection.headerLength)) {
+    header.addAll(chunk);
+  }
+  return FileSelection(name: name, path: path, sizeBytes: size, header: header);
 }

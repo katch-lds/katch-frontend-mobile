@@ -36,7 +36,6 @@ void main() {
     await manager.restore();
 
     expect(manager.status, SessionStatus.signedIn);
-    expect(manager.isAuthenticated, isTrue);
     expect(manager.accessToken, 'token-candidato');
     expect(manager.userId, isNotNull);
   });

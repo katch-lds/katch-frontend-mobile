@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Seleção por etiquetas (modelo de classes, 9.4; RF007): cada etiqueta liga
-/// ou desliga uma opção, e podem ficar várias escolhidas.
+/// Seleção por etiquetas (RF007): cada etiqueta liga ou desliga uma opção, e
+/// podem ficar várias escolhidas.
 class OptionChips<T> extends StatelessWidget {
   const OptionChips({
     super.key,

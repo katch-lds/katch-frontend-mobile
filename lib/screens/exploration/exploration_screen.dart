@@ -13,7 +13,7 @@ import '../profile/preferences_screen.dart';
 import 'job_detail_screen.dart';
 
 /// Exploração de vagas, M09, com os estados M10 (quota esgotada) e M11 (sem
-/// vagas) (modelo de classes, 8.4 e 9.1; UC05).
+/// vagas), do UC05.
 class ExplorationScreen extends StatefulWidget {
   const ExplorationScreen({super.key});
 
@@ -167,7 +167,6 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
         );
       case ExplorationStatus.card:
       case ExplorationStatus.quotaExhausted:
-        final dependencies = AppScope.of(context);
         return JobCardView(
           key: ValueKey(_answers),
           card: card!,
@@ -175,8 +174,6 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
           onDecline: _decline,
           onInterest: _interest,
           onDetail: () => _openDetail(card.jobId),
-          baseUrl: dependencies.config.apiBaseUrl,
-          credentials: dependencies.session,
         );
     }
   }

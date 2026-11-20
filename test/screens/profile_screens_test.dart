@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:katch_mobile/core/api_exception.dart';
@@ -155,6 +157,46 @@ void main() {
       expect(find.text(ProfileFilesScreen.successMessage), findsOneWidget);
     });
 
+    testWidgets('aberto com o perfil a chegar, mantém as hiperligações', (
+      tester,
+    ) async {
+      app.profileService
+        ..profile = sampleProfile(links: ['https://exemplo.pt/rita'])
+        ..profileGate = Completer<void>();
+      unawaited(app.dependencies.profile.load());
+      await pumpScreen(tester, app, const ProfileFilesScreen());
+
+      app.profileService.profileGate!.complete();
+      await tester.pumpAndSettle();
+      final link = find.byKey(const Key('files-link-0'));
+      expect(
+        find.descendant(
+          of: link,
+          matching: find.text('https://exemplo.pt/rita'),
+        ),
+        findsOneWidget,
+      );
+
+      await tapVisible(tester, find.byKey(const Key('files-save')));
+      expect(app.profileService.linkRequests, isEmpty);
+      expect(app.profileService.calls, ['getProfile']);
+    });
+
+    testWidgets('sem perfil, indica o motivo e permite repetir', (
+      tester,
+    ) async {
+      app.profileService.failures['getProfile'] = () =>
+          const ConnectionFailure();
+      await pumpFiles(tester);
+
+      expect(find.text(connectionFailureMessage), findsOneWidget);
+
+      app.profileService.failures.clear();
+      await tester.tap(find.byKey(const Key('load-retry')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('files-pick-photo')), findsOneWidget);
+    });
+
     testWidgets('rejeita a imagem de 5 MB + 1 byte e o PDF falso', (
       tester,
     ) async {
@@ -208,6 +250,22 @@ void main() {
       await tester.tap(find.text(option).last);
       await tester.pumpAndSettle();
     }
+
+    testWidgets('aberto com o perfil a chegar, mostra as competências', (
+      tester,
+    ) async {
+      app.profileService.profileGate = Completer<void>();
+      unawaited(app.dependencies.profile.load());
+      await pumpScreen(tester, app, const SkillsScreen());
+
+      app.profileService.profileGate!.complete();
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(Key('skill-chip-${flutterSkill.name}')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('load-retry')), findsNothing);
+    });
 
     testWidgets('escolhe da lista, acrescenta «C#» e grava', (tester) async {
       await pumpSkills(tester);
@@ -341,12 +399,25 @@ void main() {
       expect(find.text(PreferencesScreen.successMessage), findsOneWidget);
     });
 
+    testWidgets('aberto com o perfil a chegar, mostra o formulário', (
+      tester,
+    ) async {
+      app.profileService.profileGate = Completer<void>();
+      unawaited(app.dependencies.profile.load());
+      await pumpScreen(tester, app, const PreferencesScreen());
+
+      app.profileService.profileGate!.complete();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('preferences-distance')), findsOneWidget);
+    });
+
     testWidgets('sem perfil, indica a falha e permite repetir', (tester) async {
       app.profileService.failures['getProfile'] = () =>
           const ConnectionFailure();
       await pumpScreen(tester, app, const PreferencesScreen());
       await tester.pumpAndSettle();
 
+      expect(find.text(connectionFailureMessage), findsOneWidget);
       expect(find.byKey(const Key('load-retry')), findsOneWidget);
 
       app.profileService.failures.clear();

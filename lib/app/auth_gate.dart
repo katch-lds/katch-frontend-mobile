@@ -5,7 +5,7 @@ import '../session/session_status.dart';
 import 'app_scope.dart';
 import 'home_shell.dart';
 
-/// Escolhe o ecrã segundo o estado da sessão (modelo de classes, 9.2).
+/// Escolhe o ecrã segundo o estado da sessão.
 ///
 /// Sem sessão, ou com a sessão expirada, mostra o início de sessão (M01): as
 /// áreas reservadas só são apresentadas com a sessão iniciada (RF105, RNF005).

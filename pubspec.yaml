@@ -4,18 +4,21 @@ publish_to: none
 version: 0.1.0+1
 
 environment:
+  # O limite inferior do sdk fixa a versão da linguagem (3.8), de que dependem o
+  # dart format e o analisador; o Flutter 3.47 (material_ui) já exige Dart 3.13.
   sdk: ^3.8.0
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
     sdk: flutter
   http: ^1.4.0
-  # Armazenamento seguro da credencial de sessão (I075; modelo de classes, secção 6).
+  # Armazenamento seguro da credencial de sessão (I075).
   flutter_secure_storage: ^9.2.4
   # Material Design, separado do SDK desde o Flutter 3.47 (package:flutter/material.dart depreciado).
   material_ui: ^1.11.0
   file_selector: ^1.1.0
-  # Abertura do sítio da Empresa no navegador (ExternalLauncher, I076; modelo de classes, 4.2).
+  # Abertura do sítio da Empresa no navegador (ExternalLauncher, I076).
   url_launcher: ^6.3.3
 dev_dependencies:
   flutter_test:

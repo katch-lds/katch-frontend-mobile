@@ -342,6 +342,7 @@ void main() {
       final api = HttpApiClient(
         baseUrl: 'https://api.test',
         requestTimeout: app.dependencies.config.requestTimeout,
+        uploadTimeout: app.dependencies.config.uploadTimeout,
         credentials: app.session,
         monitor: app.monitor,
         client: MockClient((_) => Completer<http.Response>().future),

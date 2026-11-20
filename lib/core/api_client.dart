@@ -1,6 +1,6 @@
 import '../models/file_selection.dart';
 
-/// Interface única dos pedidos à API (modelo de classes do mobile v02, 4.1).
+/// Interface única dos pedidos à API.
 ///
 /// As operações devolvem o JSON já descodificado; os serviços convertem-no
 /// em modelos.

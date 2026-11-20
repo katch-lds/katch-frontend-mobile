@@ -1,4 +1,4 @@
-/// Abre uma aplicação externa do dispositivo (modelo de classes, 4.2).
+/// Abre uma aplicação externa do dispositivo.
 ///
 /// A plataforma nunca envia correio eletrónico nem SMS por si própria: só
 /// entrega o endereço à aplicação do dispositivo (arquitetura, secção 2.5).

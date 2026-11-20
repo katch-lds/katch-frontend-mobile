@@ -5,9 +5,10 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../state/load_status.dart';
 import '../../state/skills_controller.dart';
-import '../../widgets/connection_banner.dart';
+import '../../widgets/dropdown_field.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/save_button.dart';
 import '../../widgets/skill_chip.dart';
@@ -70,7 +71,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
   }
 
   void _addCustom() {
-    if (_controller.addCustom()) {
+    if (_controller.addCustom(_customLabel.text)) {
       _customLabel.clear();
     }
   }
@@ -80,39 +81,25 @@ class _SkillsScreenState extends State<SkillsScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text(SkillsScreen.successMessage)));
+    showSuccess(context, SkillsScreen.successMessage);
   }
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Competências')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                switch (_controller.loadStatus) {
-                  case LoadStatus.idle || LoadStatus.loading:
-                    return const LoadStateView.loading();
-                  case LoadStatus.failed:
-                    return LoadStateView.failed(
-                      message: _controller.errorMessage,
-                      fallback: 'Não foi possível obter as competências.',
-                      onRetry: () => unawaited(_controller.load()),
-                    );
-                  case LoadStatus.loaded:
-                    return _buildContent(context);
-                }
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Competências',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final status = _controller.loadStatus;
+          return LoadStatusView(
+            failed: status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: 'Não foi possível obter as competências.',
+            onRetry: () => unawaited(_controller.load()),
+            child: status == LoadStatus.loaded ? _buildContent(context) : null,
+          );
+        },
       ),
     );
   }
@@ -153,28 +140,19 @@ class _SkillsScreenState extends State<SkillsScreen> {
               ],
             ),
           const SizedBox(height: 24),
-          InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Acrescentar competência',
-              border: OutlineInputBorder(),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                key: const Key('skills-combobox'),
-                isExpanded: true,
-                isDense: true,
-                hint: const Text('Escolha da lista ou «Outro»'),
-                items: [
-                  for (final skill in _controller.available)
-                    DropdownMenuItem(value: skill.id, child: Text(skill.name)),
-                  const DropdownMenuItem(
-                    value: SkillsScreen.otherOption,
-                    child: Text('Outro'),
-                  ),
-                ],
-                onChanged: loading ? null : _choose,
+          DropdownField<String>(
+            fieldKey: const Key('skills-combobox'),
+            label: 'Acrescentar competência',
+            hint: 'Escolha da lista ou «Outro»',
+            items: [
+              for (final skill in _controller.available)
+                DropdownMenuItem(value: skill.id, child: Text(skill.name)),
+              const DropdownMenuItem(
+                value: SkillsScreen.otherOption,
+                child: Text('Outro'),
               ),
-            ),
+            ],
+            onChanged: loading ? null : _choose,
           ),
           FieldErrorText(errors.reasonFor(SkillsController.skillIdField)),
           if (_controller.customEnabled) ...[
@@ -191,10 +169,8 @@ class _SkillsScreenState extends State<SkillsScreen> {
                     '+ # . -',
                 helperMaxLines: 2,
                 errorText: errors.reasonFor(SkillsController.labelField),
-                errorMaxLines: 3,
-                border: const OutlineInputBorder(),
               ),
-              onChanged: (value) => _controller.customLabel = value,
+              onChanged: (_) => _controller.customLabelChanged(),
               onSubmitted: (_) => _addCustom(),
             ),
             const SizedBox(height: 8),

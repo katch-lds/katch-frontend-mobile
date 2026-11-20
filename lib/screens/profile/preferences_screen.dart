@@ -4,11 +4,12 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/app_scope.dart';
 import '../../models/profile_enums.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/preferences_controller.dart';
 import '../../state/profile_store.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/option_chips.dart';
 import '../../widgets/save_button.dart';
@@ -61,36 +62,24 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(PreferencesScreen.successMessage)),
-    );
+    showSuccess(context, PreferencesScreen.successMessage);
   }
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Preferências de procura')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: Listenable.merge([_controller, _store]),
-              builder: (context, _) {
-                if (!_ready) {
-                  return _store.status == LoadStatus.failed
-                      ? LoadStateView.failed(
-                          message: null,
-                          onRetry: () => unawaited(_load()),
-                        )
-                      : const LoadStateView.loading();
-                }
-                return _buildForm(context);
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Preferências de procura',
+      body: ListenableBuilder(
+        listenable: Listenable.merge([_controller, _store]),
+        builder: (context, _) {
+          return LoadStatusView(
+            failed: !_ready && _store.status == LoadStatus.failed,
+            message: _store.errorMessage,
+            fallback: profileFailureMessage,
+            onRetry: () => unawaited(_load()),
+            child: _ready ? _buildForm(context) : null,
+          );
+        },
       ),
     );
   }
@@ -121,8 +110,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
               errorText: errors.reasonFor(
                 PreferencesController.maxDistanceKmField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.maxDistanceText = value,
           ),
@@ -138,8 +125,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
               errorText: errors.reasonFor(
                 PreferencesController.minSalaryExpectationField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.minSalaryText = value,
           ),
