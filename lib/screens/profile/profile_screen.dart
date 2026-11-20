@@ -77,22 +77,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       listenable: Listenable.merge([_controller, _store]),
       builder: (context, _) {
         final profile = _store.profile;
-        switch (_controller.loadStatus) {
-          case LoadStatus.idle || LoadStatus.loading:
-            return const LoadStateView.loading();
-          case LoadStatus.failed:
-            return LoadStateView.failed(
-              message: _controller.errorMessage,
-              fallback: profileFailureMessage,
-              onRetry: () => unawaited(_controller.load()),
-            );
-          case LoadStatus.loaded:
-            break;
-        }
-        if (profile == null) {
-          return const LoadStateView.loading();
-        }
-        return _buildForm(context, profile);
+        final loaded = _controller.loadStatus == LoadStatus.loaded;
+        return LoadStatusView(
+          failed: _controller.loadStatus == LoadStatus.failed,
+          message: _controller.errorMessage,
+          fallback: profileFailureMessage,
+          onRetry: () => unawaited(_controller.load()),
+          child: loaded && profile != null
+              ? _buildForm(context, profile)
+              : null,
+        );
       },
     );
   }

@@ -50,3 +50,36 @@ class LoadStateView extends StatelessWidget {
     );
   }
 }
+
+/// Falha, carregamento ou conteúdo de um ecrã que pede dados: a falha
+/// prevalece e, sem [child], o pedido está em curso.
+class LoadStatusView extends StatelessWidget {
+  const LoadStatusView({
+    super.key,
+    required this.failed,
+    required this.message,
+    required this.fallback,
+    required this.onRetry,
+    required this.child,
+  });
+
+  final bool failed;
+  final String? message;
+  final String fallback;
+  final VoidCallback onRetry;
+
+  /// Conteúdo do ecrã, ou `null` enquanto os dados não chegam.
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (failed) {
+      return LoadStateView.failed(
+        message: message,
+        fallback: fallback,
+        onRetry: onRetry,
+      );
+    }
+    return child ?? const LoadStateView.loading();
+  }
+}

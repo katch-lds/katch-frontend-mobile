@@ -6,8 +6,8 @@ import '../../app/app_scope.dart';
 import '../../models/job_detail_dto.dart';
 import '../../state/job_detail_controller.dart';
 import '../../state/load_status.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/job_card_view.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import 'company_page_screen.dart';
 
@@ -55,32 +55,20 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Detalhe da vaga')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                final detail = _controller.detail;
-                if (_controller.status == LoadStatus.failed) {
-                  return LoadStateView.failed(
-                    message: _controller.errorMessage,
-                    onRetry: () => unawaited(_controller.load(widget.jobId)),
-                    fallback: JobDetailScreen.failedFallback,
-                  );
-                }
-                if (detail == null) {
-                  return const LoadStateView.loading();
-                }
-                return _buildDetail(context, detail);
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Detalhe da vaga',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final detail = _controller.detail;
+          return LoadStatusView(
+            failed: _controller.status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: JobDetailScreen.failedFallback,
+            onRetry: () => unawaited(_controller.load(widget.jobId)),
+            child: detail == null ? null : _buildDetail(context, detail),
+          );
+        },
       ),
     );
   }

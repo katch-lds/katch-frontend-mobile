@@ -3,8 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../state/change_password_controller.dart';
 import '../../state/load_status.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 
 /// Alteração da própria palavra-passe, M21 (RF002).
 class ChangePasswordScreen extends StatefulWidget {
@@ -45,74 +45,62 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Alterar palavra-passe')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                final loading = _controller.status == LoadStatus.loading;
-                final errors = _controller.errors;
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _PasswordInput(
-                        fieldKey: const Key('password-current'),
-                        label: 'Palavra-passe atual',
-                        enabled: !loading,
-                        error: errors.reasonFor(
-                          ChangePasswordController.currentPasswordField,
-                        ),
-                        onChanged: (value) =>
-                            _controller.currentPassword = value,
-                      ),
-                      _PasswordInput(
-                        fieldKey: const Key('password-new'),
-                        label: 'Palavra-passe nova',
-                        helper:
-                            'Pelo menos 8 caracteres, uma letra e um algarismo.',
-                        enabled: !loading,
-                        error: errors.reasonFor(
-                          ChangePasswordController.newPasswordField,
-                        ),
-                        onChanged: (value) => _controller.newPassword = value,
-                      ),
-                      _PasswordInput(
-                        fieldKey: const Key('password-confirmation'),
-                        label: 'Confirmar a palavra-passe nova',
-                        enabled: !loading,
-                        error: errors.reasonFor(
-                          ChangePasswordController.confirmationField,
-                        ),
-                        onChanged: (value) => _controller.confirmation = value,
-                      ),
-                      FormMessage(message: _controller.errorMessage),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        key: const Key('password-submit'),
-                        onPressed: loading ? null : _submit,
-                        child: loading
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('Alterar palavra-passe'),
-                      ),
-                    ],
+    return KatchScaffold(
+      title: 'Alterar palavra-passe',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final loading = _controller.status == LoadStatus.loading;
+          final errors = _controller.errors;
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _PasswordInput(
+                  fieldKey: const Key('password-current'),
+                  label: 'Palavra-passe atual',
+                  enabled: !loading,
+                  error: errors.reasonFor(
+                    ChangePasswordController.currentPasswordField,
                   ),
-                );
-              },
+                  onChanged: (value) => _controller.currentPassword = value,
+                ),
+                _PasswordInput(
+                  fieldKey: const Key('password-new'),
+                  label: 'Palavra-passe nova',
+                  helper: 'Pelo menos 8 caracteres, uma letra e um algarismo.',
+                  enabled: !loading,
+                  error: errors.reasonFor(
+                    ChangePasswordController.newPasswordField,
+                  ),
+                  onChanged: (value) => _controller.newPassword = value,
+                ),
+                _PasswordInput(
+                  fieldKey: const Key('password-confirmation'),
+                  label: 'Confirmar a palavra-passe nova',
+                  enabled: !loading,
+                  error: errors.reasonFor(
+                    ChangePasswordController.confirmationField,
+                  ),
+                  onChanged: (value) => _controller.confirmation = value,
+                ),
+                FormMessage(message: _controller.errorMessage),
+                const SizedBox(height: 16),
+                FilledButton(
+                  key: const Key('password-submit'),
+                  onPressed: loading ? null : _submit,
+                  child: loading
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Alterar palavra-passe'),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

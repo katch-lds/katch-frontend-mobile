@@ -96,6 +96,7 @@ import 'package:katch_mobile/widgets/field_error_text.dart';
 import 'package:katch_mobile/widgets/form_message.dart';
 import 'package:katch_mobile/widgets/job_card_view.dart';
 import 'package:katch_mobile/widgets/job_formats.dart';
+import 'package:katch_mobile/widgets/katch_scaffold.dart';
 import 'package:katch_mobile/widgets/load_state_view.dart';
 import 'package:katch_mobile/widgets/option_chips.dart';
 import 'package:katch_mobile/widgets/photo_grid.dart';

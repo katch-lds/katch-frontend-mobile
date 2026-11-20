@@ -5,8 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../state/load_status.dart';
 import '../../state/register_controller.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import 'register_success_screen.dart';
 
 /// Registo do Candidato, M02 e M03 (RF003, RF004), e confirmação, M04 (RF005).
@@ -44,7 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
     return ListenableBuilder(
       listenable: _controller,
       builder: (context, _) {
@@ -53,93 +52,74 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
         final loading = _controller.status == LoadStatus.loading;
         final errors = _controller.errors;
-        return Scaffold(
-          appBar: AppBar(title: const Text('Criar conta')),
-          body: Column(
-            children: [
-              ConnectionBanner(monitor: monitor),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _TextInput(
-                        fieldKey: const Key('register-full-name'),
-                        label: 'Nome completo',
-                        enabled: !loading,
-                        error: errors.reasonFor(
-                          RegisterController.fullNameField,
-                        ),
-                        onChanged: (value) => _controller.fullName = value,
-                      ),
-                      _TextInput(
-                        fieldKey: const Key('register-email'),
-                        label: 'Correio eletrónico',
-                        enabled: !loading,
-                        keyboardType: TextInputType.emailAddress,
-                        error: errors.reasonFor(RegisterController.emailField),
-                        onChanged: (value) => _controller.email = value,
-                      ),
-                      _TextInput(
-                        fieldKey: const Key('register-phone'),
-                        label: 'Contacto telefónico',
-                        enabled: !loading,
-                        keyboardType: TextInputType.phone,
-                        error: errors.reasonFor(
-                          RegisterController.phoneNumberField,
-                        ),
-                        onChanged: (value) => _controller.phoneNumber = value,
-                      ),
-                      _LocationInput(
-                        controller: _controller,
-                        enabled: !loading,
-                      ),
-                      _TextInput(
-                        fieldKey: const Key('register-password'),
-                        label: 'Palavra-passe',
-                        helper:
-                            'Pelo menos 8 caracteres, uma letra e um algarismo.',
-                        enabled: !loading,
-                        obscure: true,
-                        error: errors.reasonFor(
-                          RegisterController.passwordField,
-                        ),
-                        onChanged: (value) => _controller.password = value,
-                      ),
-                      CheckboxListTile(
-                        key: const Key('register-accept-terms'),
-                        contentPadding: EdgeInsets.zero,
-                        controlAffinity: ListTileControlAffinity.leading,
-                        value: _controller.acceptTerms,
-                        onChanged: loading
-                            ? null
-                            : (bool? value) =>
-                                  _controller.acceptTerms = value ?? false,
-                        title: const Text('Aceito as condições de utilização'),
-                        subtitle: _FieldError(
-                          errors.reasonFor(RegisterController.acceptTermsField),
-                        ),
-                      ),
-                      FormMessage(message: _controller.errorMessage),
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        key: const Key('register-submit'),
-                        onPressed: loading ? null : _controller.submit,
-                        child: loading
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('Criar conta'),
-                      ),
-                    ],
+        return KatchScaffold(
+          title: 'Criar conta',
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _TextInput(
+                  fieldKey: const Key('register-full-name'),
+                  label: 'Nome completo',
+                  enabled: !loading,
+                  error: errors.reasonFor(RegisterController.fullNameField),
+                  onChanged: (value) => _controller.fullName = value,
+                ),
+                _TextInput(
+                  fieldKey: const Key('register-email'),
+                  label: 'Correio eletrónico',
+                  enabled: !loading,
+                  keyboardType: TextInputType.emailAddress,
+                  error: errors.reasonFor(RegisterController.emailField),
+                  onChanged: (value) => _controller.email = value,
+                ),
+                _TextInput(
+                  fieldKey: const Key('register-phone'),
+                  label: 'Contacto telefónico',
+                  enabled: !loading,
+                  keyboardType: TextInputType.phone,
+                  error: errors.reasonFor(RegisterController.phoneNumberField),
+                  onChanged: (value) => _controller.phoneNumber = value,
+                ),
+                _LocationInput(controller: _controller, enabled: !loading),
+                _TextInput(
+                  fieldKey: const Key('register-password'),
+                  label: 'Palavra-passe',
+                  helper: 'Pelo menos 8 caracteres, uma letra e um algarismo.',
+                  enabled: !loading,
+                  obscure: true,
+                  error: errors.reasonFor(RegisterController.passwordField),
+                  onChanged: (value) => _controller.password = value,
+                ),
+                CheckboxListTile(
+                  key: const Key('register-accept-terms'),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: _controller.acceptTerms,
+                  onChanged: loading
+                      ? null
+                      : (bool? value) =>
+                            _controller.acceptTerms = value ?? false,
+                  title: const Text('Aceito as condições de utilização'),
+                  subtitle: _FieldError(
+                    errors.reasonFor(RegisterController.acceptTermsField),
                   ),
                 ),
-              ),
-            ],
+                FormMessage(message: _controller.errorMessage),
+                const SizedBox(height: 16),
+                FilledButton(
+                  key: const Key('register-submit'),
+                  onPressed: loading ? null : _controller.submit,
+                  child: loading
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Criar conta'),
+                ),
+              ],
+            ),
           ),
         );
       },

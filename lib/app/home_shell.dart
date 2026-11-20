@@ -2,8 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../screens/exploration/exploration_screen.dart';
 import '../screens/profile/profile_screen.dart';
-import '../widgets/connection_banner.dart';
-import 'app_scope.dart';
+import '../widgets/katch_scaffold.dart';
 
 /// Área do Candidato, com a barra inferior de quatro separadores.
 ///
@@ -25,25 +24,17 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex])),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          // Os separadores ficam montados: trocar de separador não descarta
-          // as edições por gravar do perfil (M05).
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: const [
-                ExplorationScreen(),
-                _PendingArea(),
-                _PendingArea(),
-                ProfileScreen(),
-              ],
-            ),
-          ),
+    return KatchScaffold(
+      title: _titles[_selectedIndex],
+      // Os separadores ficam montados: trocar de separador não descarta as
+      // edições por gravar do perfil (M05).
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: const [
+          ExplorationScreen(),
+          _PendingArea(),
+          _PendingArea(),
+          ProfileScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(

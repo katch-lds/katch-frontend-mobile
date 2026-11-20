@@ -6,8 +6,8 @@ import '../../app/app_scope.dart';
 import '../../models/company_page_dto.dart';
 import '../../state/company_page_controller.dart';
 import '../../state/load_status.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/photo_grid.dart';
 import '../../widgets/remote_image.dart';
@@ -50,33 +50,20 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Empresa')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                final page = _controller.page;
-                if (_controller.status == LoadStatus.failed) {
-                  return LoadStateView.failed(
-                    message: _controller.errorMessage,
-                    onRetry: () =>
-                        unawaited(_controller.load(widget.companyId)),
-                    fallback: CompanyPageScreen.failedFallback,
-                  );
-                }
-                if (page == null) {
-                  return const LoadStateView.loading();
-                }
-                return _buildPage(context, page);
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Empresa',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final page = _controller.page;
+          return LoadStatusView(
+            failed: _controller.status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: CompanyPageScreen.failedFallback,
+            onRetry: () => unawaited(_controller.load(widget.companyId)),
+            child: page == null ? null : _buildPage(context, page),
+          );
+        },
       ),
     );
   }

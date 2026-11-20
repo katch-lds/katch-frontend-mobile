@@ -5,9 +5,9 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../state/load_status.dart';
 import '../../state/skills_controller.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/save_button.dart';
 import '../../widgets/skill_chip.dart';
@@ -87,32 +87,20 @@ class _SkillsScreenState extends State<SkillsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Competências')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                switch (_controller.loadStatus) {
-                  case LoadStatus.idle || LoadStatus.loading:
-                    return const LoadStateView.loading();
-                  case LoadStatus.failed:
-                    return LoadStateView.failed(
-                      message: _controller.errorMessage,
-                      fallback: 'Não foi possível obter as competências.',
-                      onRetry: () => unawaited(_controller.load()),
-                    );
-                  case LoadStatus.loaded:
-                    return _buildContent(context);
-                }
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Competências',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final status = _controller.loadStatus;
+          return LoadStatusView(
+            failed: status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: 'Não foi possível obter as competências.',
+            onRetry: () => unawaited(_controller.load()),
+            child: status == LoadStatus.loaded ? _buildContent(context) : null,
+          );
+        },
       ),
     );
   }
