@@ -62,9 +62,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(PreferencesScreen.successMessage)),
-    );
+    showSuccess(context, PreferencesScreen.successMessage);
   }
 
   @override
@@ -112,8 +110,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
               errorText: errors.reasonFor(
                 PreferencesController.maxDistanceKmField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.maxDistanceText = value,
           ),
@@ -129,8 +125,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
               errorText: errors.reasonFor(
                 PreferencesController.minSalaryExpectationField,
               ),
-              errorMaxLines: 3,
-              border: const OutlineInputBorder(),
             ),
             onChanged: (value) => _controller.minSalaryText = value,
           ),

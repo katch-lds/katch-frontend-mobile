@@ -4,7 +4,9 @@ import '../../app/app_scope.dart';
 import '../../state/change_password_controller.dart';
 import '../../state/load_status.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/form_text_field.dart';
 import '../../widgets/katch_scaffold.dart';
+import '../../widgets/save_button.dart';
 
 /// Alteração da própria palavra-passe, M21 (RF002).
 class ChangePasswordScreen extends StatefulWidget {
@@ -37,9 +39,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (!changed || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(ChangePasswordScreen.successMessage)),
-    );
+    showSuccess(context, ChangePasswordScreen.successMessage);
     Navigator.of(context).pop();
   }
 
@@ -57,7 +57,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _PasswordInput(
+                FormTextField(
+                  obscure: true,
                   fieldKey: const Key('password-current'),
                   label: 'Palavra-passe atual',
                   enabled: !loading,
@@ -66,7 +67,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                   onChanged: (value) => _controller.currentPassword = value,
                 ),
-                _PasswordInput(
+                FormTextField(
+                  obscure: true,
                   fieldKey: const Key('password-new'),
                   label: 'Palavra-passe nova',
                   helper: 'Pelo menos 8 caracteres, uma letra e um algarismo.',
@@ -76,7 +78,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   ),
                   onChanged: (value) => _controller.newPassword = value,
                 ),
-                _PasswordInput(
+                FormTextField(
+                  obscure: true,
                   fieldKey: const Key('password-confirmation'),
                   label: 'Confirmar a palavra-passe nova',
                   enabled: !loading,
@@ -87,58 +90,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ),
                 FormMessage(message: _controller.errorMessage),
                 const SizedBox(height: 16),
-                FilledButton(
+                SaveButton(
                   key: const Key('password-submit'),
-                  onPressed: loading ? null : _submit,
-                  child: loading
-                      ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Alterar palavra-passe'),
+                  loading: loading,
+                  onPressed: _submit,
+                  label: 'Alterar palavra-passe',
                 ),
               ],
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _PasswordInput extends StatelessWidget {
-  const _PasswordInput({
-    required this.fieldKey,
-    required this.label,
-    required this.enabled,
-    required this.onChanged,
-    this.error,
-    this.helper,
-  });
-
-  final Key fieldKey;
-  final String label;
-  final bool enabled;
-  final ValueChanged<String> onChanged;
-  final String? error;
-  final String? helper;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
-        key: fieldKey,
-        enabled: enabled,
-        obscureText: true,
-        decoration: InputDecoration(
-          labelText: label,
-          helperText: helper,
-          errorText: error,
-          errorMaxLines: 3,
-          border: const OutlineInputBorder(),
-        ),
-        onChanged: onChanged,
       ),
     );
   }

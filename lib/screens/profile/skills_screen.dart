@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../state/load_status.dart';
 import '../../state/skills_controller.dart';
+import '../../widgets/dropdown_field.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
 import '../../widgets/katch_scaffold.dart';
@@ -80,9 +81,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text(SkillsScreen.successMessage)));
+    showSuccess(context, SkillsScreen.successMessage);
   }
 
   @override
@@ -141,28 +140,19 @@ class _SkillsScreenState extends State<SkillsScreen> {
               ],
             ),
           const SizedBox(height: 24),
-          InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Acrescentar competência',
-              border: OutlineInputBorder(),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                key: const Key('skills-combobox'),
-                isExpanded: true,
-                isDense: true,
-                hint: const Text('Escolha da lista ou «Outro»'),
-                items: [
-                  for (final skill in _controller.available)
-                    DropdownMenuItem(value: skill.id, child: Text(skill.name)),
-                  const DropdownMenuItem(
-                    value: SkillsScreen.otherOption,
-                    child: Text('Outro'),
-                  ),
-                ],
-                onChanged: loading ? null : _choose,
+          DropdownField<String>(
+            fieldKey: const Key('skills-combobox'),
+            label: 'Acrescentar competência',
+            hint: 'Escolha da lista ou «Outro»',
+            items: [
+              for (final skill in _controller.available)
+                DropdownMenuItem(value: skill.id, child: Text(skill.name)),
+              const DropdownMenuItem(
+                value: SkillsScreen.otherOption,
+                child: Text('Outro'),
               ),
-            ),
+            ],
+            onChanged: loading ? null : _choose,
           ),
           FieldErrorText(errors.reasonFor(SkillsController.skillIdField)),
           if (_controller.customEnabled) ...[
@@ -179,8 +169,6 @@ class _SkillsScreenState extends State<SkillsScreen> {
                     '+ # . -',
                 helperMaxLines: 2,
                 errorText: errors.reasonFor(SkillsController.labelField),
-                errorMaxLines: 3,
-                border: const OutlineInputBorder(),
               ),
               onChanged: (value) => _controller.customLabel = value,
               onSubmitted: (_) => _addCustom(),

@@ -66,9 +66,7 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(ProfileFilesScreen.successMessage)),
-    );
+    showSuccess(context, ProfileFilesScreen.successMessage);
   }
 
   @override
@@ -163,8 +161,6 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
                     errorText: errors.reasonFor(
                       ProfileFilesController.linkField(index),
                     ),
-                    errorMaxLines: 3,
-                    border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       key: Key('files-link-remove-$index'),
                       tooltip: 'Retirar',
