@@ -82,3 +82,5 @@ QG-07 preparado) e `static-analysis` (QG-05: `dart format` e `flutter analyze`).
 ## Android
 
 O `release` ainda não tem chave de assinatura própria e assina com a chave de depuração (`android/app/build.gradle.kts`).
+A cópia de segurança automática do Android está desativada (`android:allowBackup="false"`): a credencial guardada não é
+copiada para outro dispositivo, onde não poderia ser lida.
