@@ -91,7 +91,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildForm(BuildContext context, CandidateProfileDto profile) {
-    final dependencies = AppScope.of(context);
     final loading = _controller.status == LoadStatus.loading;
     final errors = _controller.errors;
     final skills = [
@@ -109,8 +108,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               RemoteImage(
                 key: const Key('profile-photo'),
                 url: profile.photoUrl,
-                baseUrl: dependencies.config.apiBaseUrl,
-                credentials: dependencies.session,
               ),
               const SizedBox(width: 16),
               Expanded(

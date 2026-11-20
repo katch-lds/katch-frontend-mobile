@@ -20,12 +20,26 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
-  static const _titles = ['Explorar', 'Matches', 'Conversas', 'Perfil'];
+  static const _destinations = [
+    NavigationDestination(
+      icon: Icon(Icons.explore_outlined),
+      label: 'Explorar',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.handshake_outlined),
+      label: 'Matches',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.chat_bubble_outline),
+      label: 'Conversas',
+    ),
+    NavigationDestination(icon: Icon(Icons.person_outline), label: 'Perfil'),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return KatchScaffold(
-      title: _titles[_selectedIndex],
+      title: _destinations[_selectedIndex].label,
       // Os separadores ficam montados: trocar de separador não descarta as
       // edições por gravar do perfil (M05).
       body: IndexedStack(
@@ -41,24 +55,7 @@ class _HomeShellState extends State<HomeShell> {
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) =>
             setState(() => _selectedIndex = index),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            label: 'Explorar',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.handshake_outlined),
-            label: 'Matches',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Conversas',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Perfil',
-          ),
-        ],
+        destinations: _destinations,
       ),
     );
   }

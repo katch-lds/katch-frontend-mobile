@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/credential_provider.dart';
 import 'remote_image.dart';
 
 /// Fotografias de uma vaga ou da galeria da Empresa, em grelha de 3 colunas.
@@ -8,16 +7,9 @@ import 'remote_image.dart';
 /// A grelha não desliza, para não competir com o gesto de deslizar o cartão de
 /// vaga (RNF010).
 class PhotoGrid extends StatelessWidget {
-  const PhotoGrid({
-    super.key,
-    required this.urls,
-    required this.baseUrl,
-    required this.credentials,
-  });
+  const PhotoGrid({super.key, required this.urls});
 
   final List<String> urls;
-  final String baseUrl;
-  final CredentialProvider credentials;
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +23,7 @@ class PhotoGrid extends StatelessWidget {
       mainAxisSpacing: 8,
       crossAxisSpacing: 8,
       children: [
-        for (final url in urls)
-          RemoteImage(
-            url: url,
-            baseUrl: baseUrl,
-            credentials: credentials,
-            circular: false,
-          ),
+        for (final url in urls) RemoteImage(url: url, circular: false),
       ],
     );
   }

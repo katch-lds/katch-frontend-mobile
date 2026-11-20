@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/credential_provider.dart';
+import '../app/app_scope.dart';
 import '../core/http_api_client.dart';
 
 /// Fotografia ou logótipo servido por um URL da API.
@@ -14,8 +14,6 @@ class RemoteImage extends StatelessWidget {
   const RemoteImage({
     super.key,
     required this.url,
-    required this.baseUrl,
-    required this.credentials,
     this.size = 72,
     this.circular = true,
   });
@@ -25,8 +23,6 @@ class RemoteImage extends StatelessWidget {
 
   /// URL relativo devolvido pela API, ou `null`.
   final String? url;
-  final String baseUrl;
-  final CredentialProvider credentials;
   final double size;
 
   /// Redonda, com `size` de diâmetro (fotografia de perfil, logótipo); com
@@ -36,14 +32,15 @@ class RemoteImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dependencies = AppScope.of(context);
     final path = url;
-    final token = credentials.accessToken;
+    final token = dependencies.session.accessToken;
     final Widget child;
     if (path == null || token == null || !path.startsWith(filesPath)) {
       child = _placeholder(context);
     } else {
       child = Image.network(
-        '$baseUrl$path',
+        '${dependencies.config.apiBaseUrl}$path',
         key: const Key('remote-image'),
         width: circular ? size : null,
         height: circular ? size : null,

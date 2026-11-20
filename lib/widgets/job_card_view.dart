@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/credential_provider.dart';
 import '../models/job_card_dto.dart';
 import 'job_formats.dart';
 import 'photo_grid.dart';
@@ -21,8 +20,6 @@ class JobCardView extends StatelessWidget {
     required this.onDecline,
     required this.onInterest,
     required this.onDetail,
-    required this.baseUrl,
-    required this.credentials,
   });
 
   final JobCardDto card;
@@ -30,8 +27,6 @@ class JobCardView extends StatelessWidget {
   final VoidCallback onDecline;
   final VoidCallback onInterest;
   final VoidCallback onDetail;
-  final String baseUrl;
-  final CredentialProvider credentials;
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +61,7 @@ class JobCardView extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
-                child: JobSummary(
-                  card: card,
-                  baseUrl: baseUrl,
-                  credentials: credentials,
-                ),
+                child: JobSummary(card: card),
               ),
             ),
             Padding(
@@ -119,16 +110,9 @@ class JobCardView extends StatelessWidget {
 /// (M12): logótipo e designação da Empresa, função, urgência, fotografias,
 /// intervalo salarial, localidade e distância, tipo de contrato e regime.
 class JobSummary extends StatelessWidget {
-  const JobSummary({
-    super.key,
-    required this.card,
-    required this.baseUrl,
-    required this.credentials,
-  });
+  const JobSummary({super.key, required this.card});
 
   final JobCardDto card;
-  final String baseUrl;
-  final CredentialProvider credentials;
 
   @override
   Widget build(BuildContext context) {
@@ -139,12 +123,7 @@ class JobSummary extends StatelessWidget {
         Row(
           children: [
             if (card.logoUrl != null) ...[
-              RemoteImage(
-                url: card.logoUrl,
-                baseUrl: baseUrl,
-                credentials: credentials,
-                size: 56,
-              ),
+              RemoteImage(url: card.logoUrl, size: 56),
               const SizedBox(width: 12),
             ],
             Expanded(
@@ -168,11 +147,7 @@ class JobSummary extends StatelessWidget {
         ],
         if (card.photoUrls.isNotEmpty) ...[
           const SizedBox(height: 12),
-          PhotoGrid(
-            urls: card.photoUrls,
-            baseUrl: baseUrl,
-            credentials: credentials,
-          ),
+          PhotoGrid(urls: card.photoUrls),
         ],
         const SizedBox(height: 12),
         _InfoRow(

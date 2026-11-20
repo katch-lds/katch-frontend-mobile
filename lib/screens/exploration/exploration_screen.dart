@@ -167,7 +167,6 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
         );
       case ExplorationStatus.card:
       case ExplorationStatus.quotaExhausted:
-        final dependencies = AppScope.of(context);
         return JobCardView(
           key: ValueKey(_answers),
           card: card!,
@@ -175,8 +174,6 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
           onDecline: _decline,
           onInterest: _interest,
           onDetail: () => _openDetail(card.jobId),
-          baseUrl: dependencies.config.apiBaseUrl,
-          credentials: dependencies.session,
         );
     }
   }

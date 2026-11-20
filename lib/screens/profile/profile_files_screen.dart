@@ -90,7 +90,6 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
   }
 
   Widget _buildContent(BuildContext context, CandidateProfileDto profile) {
-    final dependencies = AppScope.of(context);
     final loading = _controller.status == LoadStatus.loading;
     final errors = _controller.errors;
     final drafts = _controller.linkDrafts;
@@ -103,12 +102,7 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
           const _SectionTitle('Fotografia'),
           Row(
             children: [
-              RemoteImage(
-                key: const Key('files-photo'),
-                url: profile.photoUrl,
-                baseUrl: dependencies.config.apiBaseUrl,
-                credentials: dependencies.session,
-              ),
+              RemoteImage(key: const Key('files-photo'), url: profile.photoUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: _FileChoice(

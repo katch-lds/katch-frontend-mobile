@@ -69,7 +69,6 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
   }
 
   Widget _buildPage(BuildContext context, CompanyPageDto page) {
-    final dependencies = AppScope.of(context);
     final textTheme = Theme.of(context).textTheme;
     final website = page.website;
     return SingleChildScrollView(
@@ -80,11 +79,7 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
         children: [
           Row(
             children: [
-              RemoteImage(
-                url: page.logoUrl,
-                baseUrl: dependencies.config.apiBaseUrl,
-                credentials: dependencies.session,
-              ),
+              RemoteImage(url: page.logoUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(page.companyName, style: textTheme.titleLarge),
@@ -113,11 +108,7 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
             const SizedBox(height: 16),
             Text('Galeria', style: textTheme.titleMedium),
             const SizedBox(height: 8),
-            PhotoGrid(
-              urls: page.photoUrls,
-              baseUrl: dependencies.config.apiBaseUrl,
-              credentials: dependencies.session,
-            ),
+            PhotoGrid(urls: page.photoUrls),
           ],
         ],
       ),

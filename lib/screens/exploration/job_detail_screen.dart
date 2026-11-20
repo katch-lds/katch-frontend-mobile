@@ -74,7 +74,6 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Widget _buildDetail(BuildContext context, JobDetailDto detail) {
-    final dependencies = AppScope.of(context);
     final titleStyle = Theme.of(context).textTheme.titleMedium;
     return SingleChildScrollView(
       key: const Key('job-detail-list'),
@@ -82,11 +81,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          JobSummary(
-            card: detail.card,
-            baseUrl: dependencies.config.apiBaseUrl,
-            credentials: dependencies.session,
-          ),
+          JobSummary(card: detail.card),
           const SizedBox(height: 16),
           Text('Descrição', style: titleStyle),
           const SizedBox(height: 4),
