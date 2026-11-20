@@ -36,8 +36,6 @@ class SessionManager extends ChangeNotifier implements CredentialProvider {
 
   String? get userId => _current?.userId;
 
-  bool get isAuthenticated => _status == SessionStatus.signedIn;
-
   @override
   String? get accessToken {
     final session = _current;

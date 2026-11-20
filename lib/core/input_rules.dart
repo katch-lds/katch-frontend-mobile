@@ -131,9 +131,6 @@ abstract final class InputRules {
   static bool isValidDistanceKm(int value) =>
       value >= 1 && value <= maxDistanceKm;
 
-  /// Endereço iniciado por `http://` ou `https://` (P10).
-  static bool isValidLink(String value) => linkError(value) == null;
-
   /// Motivo da recusa de uma hiperligação, ou `null`: no máximo 500
   /// caracteres e iniciada por `http://` ou `https://` (P10), pela mesma
   /// ordem do backend. A repetição é verificada na lista

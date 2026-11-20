@@ -10,6 +10,7 @@ import 'package:katch_mobile/core/connection_monitor.dart';
 import 'package:katch_mobile/core/http_api_client.dart';
 import 'package:katch_mobile/models/file_selection.dart';
 import 'package:katch_mobile/session/session_manager.dart';
+import 'package:katch_mobile/session/session_status.dart';
 
 import '../support/fakes.dart';
 
@@ -88,7 +89,7 @@ void main() {
     }
 
     expect(rejection?.error.code, 'ERR-30');
-    expect(session.isAuthenticated, isTrue);
+    expect(session.status, SessionStatus.signedIn);
   });
 
   test('termina a sessão quando a credencial é recusada', () async {
@@ -98,7 +99,7 @@ void main() {
     final call = client.get('/api/candidate/profile');
 
     await expectLater(call, throwsA(isA<AuthenticationFailure>()));
-    expect(session.isAuthenticated, isFalse);
+    expect(session.status, isNot(SessionStatus.signedIn));
   });
 
   test('no início de sessão, a recusa chega como ApiRejection', () async {

@@ -90,7 +90,6 @@ class MemorySessionStorage implements SessionStorage {
 
   Session? saved;
   bool failRead = false;
-  int clears = 0;
 
   @override
   Future<Session?> read() async {
@@ -107,7 +106,6 @@ class MemorySessionStorage implements SessionStorage {
 
   @override
   Future<void> clear() async {
-    clears++;
     saved = null;
   }
 }
