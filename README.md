@@ -76,8 +76,8 @@ As pastas de `lib/` seguem as camadas do modelo de classes do frontend mobile v0
 ## Pipeline CI
 
 `.github/workflows/ci.yml`: `build-and-test` (testes com cobertura mínima de 40%, QG-01 com o APK de depuração e o
-QG-07 preparado) e `static-analysis` (QG-05: `dart format` e `flutter analyze`). A plataforma Android
-(`android/`) está no repositório.
+QG-07 preparado) e `static-analysis` (QG-05: `dart format` e `flutter analyze`), ambos com o Flutter 3.47.x. A
+plataforma Android (`android/`) está no repositório.
 
 ## Android
 
