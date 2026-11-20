@@ -6,6 +6,7 @@ import '../../app/app_scope.dart';
 import '../../core/input_rules.dart';
 import '../../models/candidate_profile_dto.dart';
 import '../../models/profile_enums.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/profile_form_controller.dart';
 import '../../state/profile_store.dart';
@@ -82,6 +83,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           case LoadStatus.failed:
             return LoadStateView.failed(
               message: _controller.errorMessage,
+              fallback: profileFailureMessage,
               onRetry: () => unawaited(_controller.load()),
             );
           case LoadStatus.loaded:

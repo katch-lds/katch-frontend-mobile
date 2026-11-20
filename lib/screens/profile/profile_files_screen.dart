@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/app_scope.dart';
 import '../../core/input_rules.dart';
 import '../../models/file_selection.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/profile_files_controller.dart';
 import '../../state/profile_store.dart';
@@ -85,7 +86,8 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
                 if (profile == null) {
                   return _store.status == LoadStatus.failed
                       ? LoadStateView.failed(
-                          message: null,
+                          message: _store.errorMessage,
+                          fallback: profileFailureMessage,
                           onRetry: () => unawaited(_load()),
                         )
                       : const LoadStateView.loading();

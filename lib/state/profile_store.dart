@@ -3,6 +3,7 @@ import '../models/candidate_profile_dto.dart';
 import '../models/search_preferences_dto.dart';
 import '../services/candidate_profile_service.dart';
 import '../session/session_manager.dart';
+import 'failure_messages.dart';
 import 'load_status.dart';
 import 'session_scoped_store.dart';
 
@@ -41,6 +42,12 @@ class ProfileStore extends SessionScopedStore {
   LoadStatus get status => _status;
 
   ApiException? get error => _error;
+
+  /// Mensagem da falha do último pedido, ou `null`.
+  String? get errorMessage {
+    final error = _error;
+    return error == null ? null : failureMessage(error);
+  }
 
   /// Pede o perfil, uma vez; quem pede durante o pedido em curso espera por
   /// ele; depois de uma falha, volta a pedir.

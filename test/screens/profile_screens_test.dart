@@ -182,6 +182,21 @@ void main() {
       expect(app.profileService.calls, ['getProfile']);
     });
 
+    testWidgets('sem perfil, indica o motivo e permite repetir', (
+      tester,
+    ) async {
+      app.profileService.failures['getProfile'] = () =>
+          const ConnectionFailure();
+      await pumpFiles(tester);
+
+      expect(find.text(connectionFailureMessage), findsOneWidget);
+
+      app.profileService.failures.clear();
+      await tester.tap(find.byKey(const Key('load-retry')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('files-pick-photo')), findsOneWidget);
+    });
+
     testWidgets('rejeita a imagem de 5 MB + 1 byte e o PDF falso', (
       tester,
     ) async {
@@ -402,6 +417,7 @@ void main() {
       await pumpScreen(tester, app, const PreferencesScreen());
       await tester.pumpAndSettle();
 
+      expect(find.text(connectionFailureMessage), findsOneWidget);
       expect(find.byKey(const Key('load-retry')), findsOneWidget);
 
       app.profileService.failures.clear();

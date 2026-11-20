@@ -18,5 +18,8 @@ String failureMessage(ApiException failure) {
 const connectionFailureMessage =
     'Sem ligação ao servidor. Verifique a ligação e tente novamente.';
 
+/// Falha do pedido do perfil sem motivo indicado.
+const profileFailureMessage = 'Não foi possível obter o perfil.';
+
 /// Mensagem dos erros que o modelo de erros não prevê.
 const unexpectedFailureMessage = 'Ocorreu um erro inesperado. Tente novamente.';

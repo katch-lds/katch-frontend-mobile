@@ -13,7 +13,7 @@ class LoadStateView extends StatelessWidget {
     super.key,
     required this.message,
     required VoidCallback this.onRetry,
-    this.fallback = 'Não foi possível obter o perfil.',
+    required this.fallback,
   });
 
   /// Motivo da falha (por exemplo, a indicação de falha de ligação).

@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/app_scope.dart';
 import '../../models/profile_enums.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/preferences_controller.dart';
 import '../../state/profile_store.dart';
@@ -81,7 +82,8 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 if (!_ready) {
                   return _store.status == LoadStatus.failed
                       ? LoadStateView.failed(
-                          message: null,
+                          message: _store.errorMessage,
+                          fallback: profileFailureMessage,
                           onRetry: () => unawaited(_load()),
                         )
                       : const LoadStateView.loading();
