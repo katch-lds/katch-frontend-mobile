@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Indicador de carregamento e de erro, com a ação de repetir (modelo de
-/// classes, 9.4; RNF014).
+/// Indicador de carregamento e de erro, com a ação de repetir (RNF014).
 class LoadStateView extends StatelessWidget {
   /// Pedido em curso.
   const LoadStateView.loading({super.key})

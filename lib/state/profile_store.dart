@@ -6,8 +6,7 @@ import '../session/session_manager.dart';
 import 'load_status.dart';
 import 'session_scoped_store.dart';
 
-/// Perfil profissional do Candidato, partilhado por M05 a M08 (modelo de
-/// classes, 8.1).
+/// Perfil profissional do Candidato, partilhado por M05 a M08.
 ///
 /// Cada controller que altera o perfil entrega-lhe o `CandidateProfileDto`
 /// devolvido pelo serviço (`update`); depois do envio de um ficheiro, volta a

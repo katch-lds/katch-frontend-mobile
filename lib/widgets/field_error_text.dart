@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Motivo de rejeição junto de um campo que não é de texto (modelo de
-/// classes, 9.4; RF004).
+/// Motivo de rejeição junto de um campo que não é de texto (RF004).
 class FieldErrorText extends StatelessWidget {
   const FieldErrorText(this.reason, {super.key});
 

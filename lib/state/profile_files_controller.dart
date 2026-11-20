@@ -19,8 +19,8 @@ final class LinkDraft {
   String url;
 }
 
-/// Estado de M06: fotografia, curriculum vitae e hiperligações (modelo de
-/// classes, 8.3; RF010, RF011, RF012).
+/// Estado de M06: fotografia, curriculum vitae e hiperligações (RF010, RF011,
+/// RF012).
 ///
 /// Valida localmente o formato e a dimensão dos ficheiros (P01, P02) e os
 /// endereços (P10) **antes do primeiro pedido**; depois envia a fotografia, o
