@@ -118,6 +118,19 @@ void main() {
     await expectLater(call, throwsA(isA<UnexpectedFailure>()));
   });
 
+  test('resposta 2xx com corpo que não é JSON é UnexpectedFailure', () async {
+    final client = clientFor((_) => http.Response('<html>proxy</html>', 200));
+
+    final call = client.get('/api/x');
+
+    await expectLater(
+      call,
+      throwsA(
+        isA<UnexpectedFailure>().having((e) => e.statusCode, 'statusCode', 200),
+      ),
+    );
+  });
+
   test('sem resposta no tempo limite, regista a falha de ligação', () async {
     final client = HttpApiClient(
       baseUrl: 'https://api.test',

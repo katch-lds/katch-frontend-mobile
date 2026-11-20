@@ -133,7 +133,7 @@ class HttpApiClient implements ApiClient {
     _monitor.reportSuccess();
     if (response.statusCode >= 200 && response.statusCode < 300) {
       _log?.call('$method $path -> ${response.statusCode}');
-      return response.body.isEmpty ? null : jsonDecode(response.body);
+      return _decodeSuccess(response);
     }
     final failure = _toException(path, response);
     final code = failure is ApiRejection ? ' ${failure.error.code}' : '';
@@ -163,6 +163,19 @@ class HttpApiClient implements ApiClient {
       return AuthenticationFailure(error.message);
     }
     return ApiRejection(error);
+  }
+
+  /// Um corpo `2xx` que não é JSON (por exemplo, a página de um proxy) fica
+  /// fora do contrato da API.
+  static Object? _decodeSuccess(http.Response response) {
+    if (response.body.isEmpty) {
+      return null;
+    }
+    try {
+      return jsonDecode(response.body);
+    } on FormatException {
+      throw UnexpectedFailure(response.statusCode);
+    }
   }
 
   static Object? _decode(String body) {
