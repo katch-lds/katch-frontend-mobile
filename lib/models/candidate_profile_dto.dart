@@ -45,18 +45,15 @@ final class CandidateProfileDto {
       experienceSummary: json['experienceSummary'] as String?,
       photoUrl: json['photoUrl'] as String?,
       hasCv: json['hasCv'] as bool? ?? false,
-      links: [
-        for (final link in json['links'] as List<Object?>? ?? const [])
-          link as String,
-      ],
-      skills: [
-        for (final item in json['skills'] as List<Object?>? ?? const [])
-          ReferenceItemDto.fromJson(item as Json),
-      ],
-      customSkills: [
-        for (final item in json['customSkills'] as List<Object?>? ?? const [])
-          CustomSkillDto.fromJson(item as Json),
-      ],
+      links: readStrings(json['links']),
+      skills: readList(
+        json['skills'],
+        (item) => ReferenceItemDto.fromJson(item as Json),
+      ),
+      customSkills: readList(
+        json['customSkills'],
+        (item) => CustomSkillDto.fromJson(item as Json),
+      ),
       preferences: preferences is Json
           ? SearchPreferencesDto.fromJson(preferences)
           : const SearchPreferencesDto(),

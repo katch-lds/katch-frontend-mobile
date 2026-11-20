@@ -17,14 +17,14 @@ final class SearchPreferencesDto {
     return SearchPreferencesDto(
       maxDistanceKm: json['maxDistanceKm'] as int?,
       minSalaryExpectation: salary is num ? salary.toDouble() : null,
-      workModes: [
-        for (final value in json['workModes'] as List<Object?>? ?? const [])
-          WorkMode.fromWire(value as String),
-      ],
-      contractTypes: [
-        for (final value in json['contractTypes'] as List<Object?>? ?? const [])
-          ContractType.fromWire(value as String),
-      ],
+      workModes: readList(
+        json['workModes'],
+        (value) => WorkMode.fromWire(value as String),
+      ),
+      contractTypes: readList(
+        json['contractTypes'],
+        (value) => ContractType.fromWire(value as String),
+      ),
     );
   }
 

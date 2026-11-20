@@ -15,16 +15,10 @@ final class JobDetailDto {
     return JobDetailDto(
       card: JobCardDto.fromJson(json['card'] as Json),
       description: json['description'] as String,
-      skills: _names(json['skills']),
-      benefits: _names(json['benefits']),
+      skills: readStrings(json['skills']),
+      benefits: readStrings(json['benefits']),
       companyId: json['companyId'] as String,
     );
-  }
-
-  static List<String> _names(Object? json) {
-    return [
-      for (final name in json as List<Object?>? ?? const []) name as String,
-    ];
   }
 
   final JobCardDto card;
