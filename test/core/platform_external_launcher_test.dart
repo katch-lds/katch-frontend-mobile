@@ -16,4 +16,19 @@ void main() {
     // Nos testes não há plataforma: o pedido ao navegador falha.
     expect(await launcher.openUrl('https://www.lumen-exemplo.pt'), isFalse);
   });
+
+  test('o correio e a chamada usam mailto: e tel: (RF025)', () async {
+    expect(
+      PlatformExternalLauncher.emailUri(' recrutamento@lumen-exemplo.pt ')
+          .toString(),
+      'mailto:recrutamento@lumen-exemplo.pt',
+    );
+    expect(
+      PlatformExternalLauncher.phoneUri('253 000 222').toString(),
+      'tel:253000222',
+    );
+    // Nos testes não há plataforma: a aplicação externa não abre.
+    expect(await launcher.openEmail('recrutamento@lumen-exemplo.pt'), isFalse);
+    expect(await launcher.openPhone('253000222'), isFalse);
+  });
 }
