@@ -145,8 +145,13 @@ void main() {
 
     final badge = tester.widget<Badge>(find.byKey(const Key('tab-unread')));
     expect(badge.isLabelVisible, isTrue);
-    expect(find.descendant(of: find.byKey(const Key('tab-unread')),
-        matching: find.text('3')), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('tab-unread')),
+        matching: find.text('3'),
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Matches'));
     await tester.pumpAndSettle();

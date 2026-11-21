@@ -19,8 +19,9 @@ void main() {
 
   test('o correio e a chamada usam mailto: e tel: (RF025)', () async {
     expect(
-      PlatformExternalLauncher.emailUri(' recrutamento@lumen-exemplo.pt ')
-          .toString(),
+      PlatformExternalLauncher.emailUri(
+        ' recrutamento@lumen-exemplo.pt ',
+      ).toString(),
       'mailto:recrutamento@lumen-exemplo.pt',
     );
     expect(

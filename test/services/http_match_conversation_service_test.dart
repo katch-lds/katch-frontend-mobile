@@ -157,19 +157,21 @@ void main() {
       expect(all.single.sentAt, DateTime.utc(2026, 11, 12, 9, 30, 0, 123));
     });
 
-    test('send envia o texto e devolve a mensagem gravada (6.8.3; RF026)',
-        () async {
-      api.response = _messageJson();
+    test(
+      'send envia o texto e devolve a mensagem gravada (6.8.3; RF026)',
+      () async {
+        api.response = _messageJson();
 
-      final message = await service.send(
-        _matchId,
-        const SendMessageRequest('Bom dia'),
-      );
+        final message = await service.send(
+          _matchId,
+          const SendMessageRequest('Bom dia'),
+        );
 
-      expect(api.calls, ['POST /api/conversations/$_matchId/messages']);
-      expect(api.bodies.single, {'content': 'Bom dia'});
-      expect(message.readAt, isNull);
-    });
+        expect(api.calls, ['POST /api/conversations/$_matchId/messages']);
+        expect(api.bodies.single, {'content': 'Bom dia'});
+        expect(message.readAt, isNull);
+      },
+    );
 
     test('close encerra a conversa (6.8.4; RF030)', () async {
       api.response = null;

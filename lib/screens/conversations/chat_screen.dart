@@ -22,7 +22,8 @@ class ChatScreen extends StatefulWidget {
   static const closedByCompanyText = 'A Empresa encerrou esta conversa.';
   static const suspendedText =
       'A conversa foi encerrada porque a conta da Empresa foi suspensa.';
-  static const readOnlyHint = 'Pode consultar o histórico, mas não enviar '
+  static const readOnlyHint =
+      'Pode consultar o histórico, mas não enviar '
       'mensagens.';
 
   static const closeConfirmation =

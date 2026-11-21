@@ -180,10 +180,7 @@ void main() {
 
       expect(find.byKey(const Key('unread-$matchA')), findsOneWidget);
       expect(find.byKey(const Key('unread-$matchB')), findsNothing);
-      expect(
-        find.textContaining(ConversationTile.closedLabel),
-        findsOneWidget,
-      );
+      expect(find.textContaining(ConversationTile.closedLabel), findsOneWidget);
       expect(app.conversations.isPolling, isTrue);
     });
 

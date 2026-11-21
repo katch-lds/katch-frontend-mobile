@@ -158,10 +158,7 @@ class ChatController extends ChangeNotifier {
     _errorMessage = null;
     _notify();
     try {
-      final message = await _service.send(
-        matchId,
-        SendMessageRequest(_draft),
-      );
+      final message = await _service.send(matchId, SendMessageRequest(_draft));
       if (_disposed) {
         return;
       }

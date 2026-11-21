@@ -71,7 +71,8 @@ class MessageBubble extends StatelessWidget {
     final readAt = message.readAt;
     final details = [
       instantLabel(message.sentAt),
-      if (isOwn) readAt == null ? unreadLabel : '$readLabel às ${_time(readAt)}',
+      if (isOwn)
+        readAt == null ? unreadLabel : '$readLabel às ${_time(readAt)}',
     ].join(' · ');
     return Align(
       key: Key('message-${message.messageId}'),

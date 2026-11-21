@@ -28,7 +28,10 @@ void main() {
   late ConversationsStore store;
 
   setUp(() async {
-    session = SessionManager(storage: MemorySessionStorage(), clock: FakeClock());
+    session = SessionManager(
+      storage: MemorySessionStorage(),
+      clock: FakeClock(),
+    );
     await session.start(candidateLogin());
     lifecycle = AppLifecycleMonitor();
     service = FakeConversationService();
@@ -50,21 +53,23 @@ void main() {
       controller = MatchesController(service: matches, launcher: launcher);
     });
 
-    test('pede os matches com a vaga, a Empresa e os contactos (RF024)',
-        () async {
-      matches.matches = [
-        sampleMatch(),
-        sampleMatch(matchId: matchB, jobStatus: JobStatus.closed),
-      ];
+    test(
+      'pede os matches com a vaga, a Empresa e os contactos (RF024)',
+      () async {
+        matches.matches = [
+          sampleMatch(),
+          sampleMatch(matchId: matchB, jobStatus: JobStatus.closed),
+        ];
 
-      await controller.load();
+        await controller.load();
 
-      expect(controller.status, LoadStatus.loaded);
-      expect(controller.matches, hasLength(2));
-      expect(controller.find(matchB)?.isJobClosed, isTrue);
-      expect(controller.find('outro'), isNull);
-      expect(controller.message, isNull);
-    });
+        expect(controller.status, LoadStatus.loaded);
+        expect(controller.matches, hasLength(2));
+        expect(controller.find(matchB)?.isJobClosed, isTrue);
+        expect(controller.find('outro'), isNull);
+        expect(controller.message, isNull);
+      },
+    );
 
     test('sem ligação, a falha é indicada e a lista anterior mantém-se '
         '(RNF014)', () async {
@@ -82,23 +87,25 @@ void main() {
       expect(controller.message, isNotNull);
     });
 
-    test('o correio e a chamada abrem as aplicações do dispositivo (RF025)',
-        () async {
-      await controller.load();
-      final match = controller.matches.single;
+    test(
+      'o correio e a chamada abrem as aplicações do dispositivo (RF025)',
+      () async {
+        await controller.load();
+        final match = controller.matches.single;
 
-      await controller.openEmail(match);
-      await controller.openPhone(match);
-      expect(launcher.emails, ['rita.lopes@atlantico.pt']);
-      expect(launcher.phones, ['912 345 678']);
-      expect(controller.message, isNull);
+        await controller.openEmail(match);
+        await controller.openPhone(match);
+        expect(launcher.emails, ['rita.lopes@atlantico.pt']);
+        expect(launcher.phones, ['912 345 678']);
+        expect(controller.message, isNull);
 
-      launcher.opens = false;
-      await controller.openEmail(match);
-      expect(controller.message, MatchesController.emailFailedMessage);
-      await controller.openPhone(match);
-      expect(controller.message, MatchesController.phoneFailedMessage);
-    });
+        launcher.opens = false;
+        await controller.openEmail(match);
+        expect(controller.message, MatchesController.emailFailedMessage);
+        await controller.openPhone(match);
+        expect(controller.message, MatchesController.phoneFailedMessage);
+      },
+    );
 
     test('depois de descartado, a resposta não notifica', () async {
       final pending = controller.load();
@@ -108,20 +115,22 @@ void main() {
   });
 
   group('ConversationsStore', () {
-    test('soma as mensagens por ler e encontra a conversa do match (RF027)',
-        () async {
-      service.conversations = [
-        sampleConversation(unreadCount: 2),
-        sampleConversation(matchId: matchB, unreadCount: 3),
-      ];
+    test(
+      'soma as mensagens por ler e encontra a conversa do match (RF027)',
+      () async {
+        service.conversations = [
+          sampleConversation(unreadCount: 2),
+          sampleConversation(matchId: matchB, unreadCount: 3),
+        ];
 
-      await store.load();
+        await store.load();
 
-      expect(store.status, LoadStatus.loaded);
-      expect(store.unreadMessages, 5);
-      expect(store.find(matchB)?.unreadCount, 3);
-      expect(store.find('outro'), isNull);
-    });
+        expect(store.status, LoadStatus.loaded);
+        expect(store.unreadMessages, 5);
+        expect(store.find(matchB)?.unreadCount, 3);
+        expect(store.find('outro'), isNull);
+      },
+    );
 
     test('a falha sem lista mostra o erro; com lista, mantém-na', () async {
       service.failures['list'] = () => const ConnectionFailure();
@@ -138,8 +147,7 @@ void main() {
       expect(store.message, isNotNull);
     });
 
-    test('o fim de sessão esvazia a lista e para a consulta (RF105)',
-        () async {
+    test('o fim de sessão esvazia a lista e para a consulta (RF105)', () async {
       await store.load();
       store.watchList(true);
       expect(store.isPolling, isTrue);
@@ -186,17 +194,19 @@ void main() {
       });
     });
 
-    test('fora de M16, pede a lista ao voltar ao primeiro plano (contador)',
-        () async {
-      await store.load();
+    test(
+      'fora de M16, pede a lista ao voltar ao primeiro plano (contador)',
+      () async {
+        await store.load();
 
-      lifecycle.didChangeAppLifecycleState(AppLifecycleState.paused);
-      lifecycle.didChangeAppLifecycleState(AppLifecycleState.resumed);
-      await pumpEventQueue();
+        lifecycle.didChangeAppLifecycleState(AppLifecycleState.paused);
+        lifecycle.didChangeAppLifecycleState(AppLifecycleState.resumed);
+        await pumpEventQueue();
 
-      expect(_count(service, 'list'), 2);
-      expect(store.isPolling, isFalse);
-    });
+        expect(_count(service, 'list'), 2);
+        expect(store.isPolling, isFalse);
+      },
+    );
   });
 
   group('ChatController', () {
@@ -226,20 +236,22 @@ void main() {
 
     tearDown(() => controller.dispose());
 
-    test('abre a conversa com o histórico ordenado e o resumo (RF028, RF068)',
-        () async {
-      await controller.open(matchA);
+    test(
+      'abre a conversa com o histórico ordenado e o resumo (RF028, RF068)',
+      () async {
+        await controller.open(matchA);
 
-      expect(controller.status, LoadStatus.loaded);
-      expect(controller.matchId, matchA);
-      expect(controller.summary?.companyName, 'Atlântico Digital');
-      expect(controller.messages.map((m) => m.messageId), ['r-1', 'c-1']);
-      expect(controller.isOwn(controller.messages.first), isFalse);
-      expect(controller.isOwn(controller.messages.last), isTrue);
-      expect(controller.isReadOnly, isFalse);
-      expect(controller.isPolling, isTrue);
-      expect(service.calls.take(2), ['list', 'open']);
-    });
+        expect(controller.status, LoadStatus.loaded);
+        expect(controller.matchId, matchA);
+        expect(controller.summary?.companyName, 'Atlântico Digital');
+        expect(controller.messages.map((m) => m.messageId), ['r-1', 'c-1']);
+        expect(controller.isOwn(controller.messages.first), isFalse);
+        expect(controller.isOwn(controller.messages.last), isTrue);
+        expect(controller.isReadOnly, isFalse);
+        expect(controller.isPolling, isTrue);
+        expect(service.calls.take(2), ['list', 'open']);
+      },
+    );
 
     test('a falha ao abrir é indicada (RNF014)', () async {
       service.failures['open'] = () => const ConnectionFailure();
@@ -251,53 +263,60 @@ void main() {
       expect(controller.isPolling, isFalse);
     });
 
-    test('só envia texto de 1 a 1000 caracteres, não só espaços (P03; RF026)',
-        () async {
-      await controller.open(matchA);
+    test(
+      'só envia texto de 1 a 1000 caracteres, não só espaços (P03; RF026)',
+      () async {
+        await controller.open(matchA);
 
-      controller.updateDraft('   ');
-      expect(controller.canSend, isFalse);
-      controller.updateDraft('x' * 1001);
-      expect(controller.canSend, isFalse);
-      controller.updateDraft('x' * 1000);
-      expect(controller.canSend, isTrue);
-      expect(controller.draftLength, 1000);
+        controller.updateDraft('   ');
+        expect(controller.canSend, isFalse);
+        controller.updateDraft('x' * 1001);
+        expect(controller.canSend, isFalse);
+        controller.updateDraft('x' * 1000);
+        expect(controller.canSend, isTrue);
+        expect(controller.draftLength, 1000);
 
-      controller.updateDraft('Quando posso ir à entrevista?');
-      await controller.send();
+        controller.updateDraft('Quando posso ir à entrevista?');
+        await controller.send();
 
-      expect(_count(service, 'send'), 1);
-      expect(controller.draft, isEmpty);
-      expect(controller.messages.last.content, 'Quando posso ir à entrevista?');
-      expect(controller.isSending, isFalse);
+        expect(_count(service, 'send'), 1);
+        expect(controller.draft, isEmpty);
+        expect(
+          controller.messages.last.content,
+          'Quando posso ir à entrevista?',
+        );
+        expect(controller.isSending, isFalse);
 
-      await controller.send();
-      expect(_count(service, 'send'), 1);
-    });
+        await controller.send();
+        expect(_count(service, 'send'), 1);
+      },
+    );
 
-    test('a rejeição ERR-36 mostra o motivo e lê de novo o estado (RF075)',
-        () async {
-      await controller.open(matchA);
-      service.failures['send'] = () =>
-          rejection('ERR-36', 'A conversa está em modo apenas de consulta.');
-      service.conversations = [
-        sampleConversation(
-          status: ConversationStatus.closed,
-          closeReason: ConversationCloseReason.companySuspended,
-        ),
-      ];
-      controller.updateDraft('Olá');
+    test(
+      'a rejeição ERR-36 mostra o motivo e lê de novo o estado (RF075)',
+      () async {
+        await controller.open(matchA);
+        service.failures['send'] = () =>
+            rejection('ERR-36', 'A conversa está em modo apenas de consulta.');
+        service.conversations = [
+          sampleConversation(
+            status: ConversationStatus.closed,
+            closeReason: ConversationCloseReason.companySuspended,
+          ),
+        ];
+        controller.updateDraft('Olá');
 
-      await controller.send();
+        await controller.send();
 
-      expect(
-        controller.errorMessage,
-        'A conversa está em modo apenas de consulta.',
-      );
-      expect(controller.isReadOnly, isTrue);
-      expect(controller.canSend, isFalse);
-      expect(controller.closedByMe, isFalse);
-    });
+        expect(
+          controller.errorMessage,
+          'A conversa está em modo apenas de consulta.',
+        );
+        expect(controller.isReadOnly, isTrue);
+        expect(controller.canSend, isFalse);
+        expect(controller.closedByMe, isFalse);
+      },
+    );
 
     test('a falha de ligação no envio mantém o rascunho', () async {
       await controller.open(matchA);

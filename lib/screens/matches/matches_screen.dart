@@ -94,7 +94,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
       listenable: _controller,
       builder: (context, _) {
         final status = _controller.status;
-        if (status == LoadStatus.idle || status == LoadStatus.loading) {
+        // Sem pedido feito (separador ainda não escolhido) não há indicador:
+        // o separador fica montado no IndexedStack e uma animação contínua
+        // manteria a aplicação a desenhar fora do ecrã.
+        if (status == LoadStatus.idle) {
+          return const SizedBox.shrink();
+        }
+        if (status == LoadStatus.loading) {
           return const LoadStateView.loading();
         }
         if (status == LoadStatus.failed) {
