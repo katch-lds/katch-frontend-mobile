@@ -15,6 +15,30 @@ class PlatformExternalLauncher implements ExternalLauncher {
     if (uri == null || !_schemes.contains(uri.scheme)) {
       return false;
     }
+    return _launch(uri);
+  }
+
+  @override
+  Future<bool> openEmail(String address) {
+    return _launch(emailUri(address));
+  }
+
+  @override
+  Future<bool> openPhone(String number) {
+    return _launch(phoneUri(number));
+  }
+
+  /// Endereço `mailto:` do contacto da Empresa.
+  static Uri emailUri(String address) {
+    return Uri(scheme: 'mailto', path: address.trim());
+  }
+
+  /// Endereço `tel:` do contacto da Empresa, só com os algarismos.
+  static Uri phoneUri(String number) {
+    return Uri(scheme: 'tel', path: number.replaceAll(RegExp(r'[^0-9+]'), ''));
+  }
+
+  Future<bool> _launch(Uri uri) async {
     try {
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } on Exception {
