@@ -70,6 +70,9 @@ abstract final class InputRules {
   /// Limite do resumo da experiência (P08).
   static const summaryMaxLength = 1000;
 
+  /// Limite de uma mensagem da conversa (P03; API v02, 6.8.3).
+  static const maxMessageLength = 1000;
+
   /// Limite da distância máxima, em quilómetros (P06).
   static const maxDistanceKm = 500;
 
@@ -158,6 +161,10 @@ abstract final class InputRules {
   /// No máximo 1000 caracteres, sem os espaços das extremidades (P08).
   static bool isValidSummary(String value) =>
       value.trim().length <= summaryMaxLength;
+
+  /// Mensagem com 1 a 1000 caracteres, não só espaços (P03; RF026).
+  static bool isValidMessage(String value) =>
+      !isBlank(value) && value.length <= maxMessageLength;
 
   /// Motivo da recusa da fotografia, ou `null`: JPEG ou PNG até 5 MB (P01).
   static String? photoError(FileSelection file) {

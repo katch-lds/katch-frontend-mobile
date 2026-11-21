@@ -10,6 +10,7 @@ import 'package:katch_mobile/screens/auth/login_screen.dart';
 import 'package:katch_mobile/session/session.dart';
 import 'package:katch_mobile/session/session_status.dart';
 
+import '../support/conversation_fakes.dart';
 import '../support/fakes.dart';
 import '../support/pump_app.dart';
 
@@ -131,20 +132,37 @@ void main() {
     expect(app.profileService.updateRequests, isEmpty);
   });
 
-  testWidgets('os separadores ainda sem ecrã indicam a área por fazer', (
-    tester,
-  ) async {
+  testWidgets('os matches e as conversas ficam a um toque da barra inferior, '
+      'com o total de mensagens por ler (RNF011, RF027)', (tester) async {
     final app = TestApp();
+    app.conversationService.conversations = [
+      sampleConversation(unreadCount: 2),
+      sampleConversation(matchId: matchB, unreadCount: 1),
+    ];
     await app.session.start(candidateLogin());
     await pumpKatchApp(tester, app);
+    await tester.pump();
+
+    final badge = tester.widget<Badge>(find.byKey(const Key('tab-unread')));
+    expect(badge.isLabelVisible, isTrue);
+    expect(find.descendant(of: find.byKey(const Key('tab-unread')),
+        matching: find.text('3')), findsOneWidget);
 
     await tester.tap(find.text('Matches'));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('match-$matchA')), findsOneWidget);
+    expect(find.text('Ver contacto'), findsOneWidget);
 
-    expect(
-      find.text('Esta área fica disponível numa próxima versão da aplicação.'),
-      findsOneWidget,
-    );
+    await tester.tap(find.text('Conversas'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('conversation-$matchA')), findsOneWidget);
+    expect(find.byKey(const Key('unread-$matchB')), findsOneWidget);
+    expect(app.conversations.isPolling, isTrue);
+
+    await tester.tap(find.text('Perfil'));
+    await tester.pump();
+    expect(app.conversations.isPolling, isFalse);
   });
 
   test('as dependências reais usam a API indicada na configuração', () async {
