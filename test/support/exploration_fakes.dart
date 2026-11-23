@@ -276,4 +276,19 @@ class FakeLauncher implements ExternalLauncher {
     urls.add(url);
     return opens;
   }
+
+  final emails = <String>[];
+  final phones = <String>[];
+
+  @override
+  Future<bool> openEmail(String address) async {
+    emails.add(address);
+    return opens;
+  }
+
+  @override
+  Future<bool> openPhone(String number) async {
+    phones.add(number);
+    return opens;
+  }
 }

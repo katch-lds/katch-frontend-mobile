@@ -359,6 +359,9 @@ void main() {
         lifecycle: app.lifecycle,
         jobExploration: HttpJobExplorationService(api),
         launcher: app.launcher,
+        matches: app.matches,
+        conversationService: app.conversationService,
+        conversations: app.conversations,
       );
       await tester.pumpWidget(
         AppScope(
