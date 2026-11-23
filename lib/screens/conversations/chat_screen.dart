@@ -6,6 +6,7 @@ import '../../app/app_scope.dart';
 import '../../models/conversation_summary_dto.dart';
 import '../../state/chat_controller.dart';
 import '../../state/load_status.dart';
+import '../../widgets/connection_banner.dart';
 import '../../widgets/conversation_widgets.dart';
 import '../../widgets/form_message.dart';
 import '../../widgets/load_state_view.dart';
@@ -149,7 +150,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
             ],
           ),
-          body: _buildBody(),
+          // Faixa de falha de ligação: as consultas periódicas sem resposta
+          // ficam indicadas sem sair da conversa (RNF014).
+          body: Column(
+            children: [
+              ConnectionBanner(monitor: AppScope.of(context).monitor),
+              Expanded(child: _buildBody()),
+            ],
+          ),
         );
       },
     );

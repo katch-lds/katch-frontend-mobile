@@ -394,6 +394,93 @@ void main() {
       expect(find.text('Olá, João'), findsOneWidget);
     });
   });
+
+  group('Falha de ligação e indicação de leitura (melhorias M01 e M04)', () {
+    testWidgets('a conversa aberta indica a falha de ligação das consultas '
+        'periódicas e retira-a quando o servidor volta a responder (RNF014)', (
+      tester,
+    ) async {
+      await pumpScreen(tester, app, const ChatScreen(matchId: matchA));
+      await tester.pump();
+      await tester.pump();
+      expect(find.text(connectionFailureMessage), findsNothing);
+
+      app.monitor.reportFailure();
+      await tester.pump();
+      expect(find.text(connectionFailureMessage), findsOneWidget);
+      expect(find.byType(ChatScreen), findsOneWidget);
+
+      app.monitor.reportSuccess();
+      await tester.pump();
+      expect(find.text(connectionFailureMessage), findsNothing);
+    });
+
+    testWidgets('o contacto da Empresa indica a falha de ligação (RNF014)', (
+      tester,
+    ) async {
+      final controller = MatchesController(
+        service: app.matches,
+        launcher: app.launcher,
+      );
+      addTearDown(controller.dispose);
+      await controller.load();
+      await pumpScreen(
+        tester,
+        app,
+        MatchContactScreen(controller: controller, matchId: matchA),
+      );
+
+      app.monitor.reportFailure();
+      await tester.pump();
+
+      expect(find.text(connectionFailureMessage), findsOneWidget);
+      expect(find.text('rita.lopes@atlantico.pt'), findsOneWidget);
+    });
+
+    test('a leitura no dia do envio mostra só a hora', () {
+      expect(
+        MessageBubble.readDetail(
+          DateTime(2026, 11, 12, 9, 30),
+          DateTime(2026, 11, 12, 18, 5),
+        ),
+        'Lida às 18:05',
+      );
+    });
+
+    test('a leitura noutro dia mostra também a data', () {
+      expect(
+        MessageBubble.readDetail(
+          DateTime(2026, 11, 12, 23, 50),
+          DateTime(2026, 11, 13, 0, 10),
+        ),
+        'Lida às 00:10 de 13/11/2026',
+      );
+    });
+
+    testWidgets('a mensagem lida noutro dia mostra a data na conversa', (
+      tester,
+    ) async {
+      app.conversationService.receive(
+        matchA,
+        sampleMessage(
+          'c-9',
+          senderId: candidateId,
+          content: 'Ainda está disponível?',
+          sentAt: DateTime(2026, 11, 12, 22),
+          readAt: DateTime(2026, 11, 14, 8, 15),
+        ),
+      );
+
+      await pumpScreen(tester, app, const ChatScreen(matchId: matchA));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.textContaining('Lida às 08:15 de 14/11/2026'),
+        findsOneWidget,
+      );
+    });
+  });
 }
 
 void _none() {}

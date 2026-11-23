@@ -72,7 +72,7 @@ class MessageBubble extends StatelessWidget {
     final details = [
       instantLabel(message.sentAt),
       if (isOwn)
-        readAt == null ? unreadLabel : '$readLabel às ${_time(readAt)}',
+        readAt == null ? unreadLabel : readDetail(message.sentAt, readAt),
     ].join(' · ');
     return Align(
       key: Key('message-${message.messageId}'),
@@ -99,10 +99,20 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  static String _time(DateTime instant) {
-    final local = instant.toLocal();
+  /// Indicação de leitura: só a hora quando a mensagem é lida no dia do
+  /// envio; com a data quando é lida noutro dia (hora local do dispositivo).
+  static String readDetail(DateTime sentAt, DateTime readAt) {
+    final sent = sentAt.toLocal();
+    final read = readAt.toLocal();
+    final sameDay =
+        sent.year == read.year &&
+        sent.month == read.month &&
+        sent.day == read.day;
+    if (!sameDay) {
+      return '$readLabel às ${instantLabel(readAt)}';
+    }
     String two(int value) => value.toString().padLeft(2, '0');
-    return '${two(local.hour)}:${two(local.minute)}';
+    return '$readLabel às ${two(read.hour)}:${two(read.minute)}';
   }
 }
 
