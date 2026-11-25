@@ -11,14 +11,19 @@ import '../core/platform_file_picker.dart';
 import '../polling/app_lifecycle_monitor.dart';
 import '../services/auth_service.dart';
 import '../services/candidate_profile_service.dart';
+import '../services/conversation_service.dart';
 import '../services/http_auth_service.dart';
 import '../services/http_candidate_profile_service.dart';
+import '../services/http_conversation_service.dart';
 import '../services/http_job_exploration_service.dart';
+import '../services/http_match_service.dart';
 import '../services/http_reference_list_service.dart';
 import '../services/job_exploration_service.dart';
+import '../services/match_service.dart';
 import '../session/secure_session_storage.dart';
 import '../session/session_manager.dart';
 import '../session/session_storage.dart';
+import '../state/conversations_store.dart';
 import '../state/profile_store.dart';
 import '../state/reference_data_store.dart';
 import 'app_config.dart';
@@ -42,6 +47,9 @@ class AppDependencies {
     required this.lifecycle,
     required this.jobExploration,
     required this.launcher,
+    required this.matches,
+    required this.conversationService,
+    required this.conversations,
   });
 
   /// Dependências reais: cliente HTTP da API v02 e armazenamento seguro.
@@ -68,6 +76,8 @@ class AppDependencies {
       log: kDebugMode ? _debugLog : null,
     );
     final profileService = HttpCandidateProfileService(api);
+    final lifecycle = AppLifecycleMonitor();
+    final conversationService = HttpConversationService(api);
     return AppDependencies(
       config: config,
       monitor: monitor,
@@ -78,9 +88,16 @@ class AppDependencies {
       profile: ProfileStore(service: profileService, session: session),
       filePicker: filePicker,
       clock: clock,
-      lifecycle: AppLifecycleMonitor(),
+      lifecycle: lifecycle,
       jobExploration: HttpJobExplorationService(api),
       launcher: launcher,
+      matches: HttpMatchService(api),
+      conversationService: conversationService,
+      conversations: ConversationsStore(
+        service: conversationService,
+        session: session,
+        lifecycle: lifecycle,
+      ),
     );
   }
 
@@ -108,6 +125,13 @@ class AppDependencies {
 
   final JobExplorationService jobExploration;
 
-  /// Navegador do dispositivo, para o sítio da Empresa (RF017).
+  /// Navegador, correio eletrónico e chamadas do dispositivo: sítio da
+  /// Empresa (RF017) e contactos depois do match (RF025).
   final ExternalLauncher launcher;
+
+  final MatchService matches;
+  final ConversationService conversationService;
+
+  /// Lista de conversas e mensagens por ler, esvaziada no fim de sessão.
+  final ConversationsStore conversations;
 }

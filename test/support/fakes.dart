@@ -28,9 +28,11 @@ import 'package:katch_mobile/services/reference_list_service.dart';
 import 'package:katch_mobile/session/session.dart';
 import 'package:katch_mobile/session/session_manager.dart';
 import 'package:katch_mobile/session/session_storage.dart';
+import 'package:katch_mobile/state/conversations_store.dart';
 import 'package:katch_mobile/state/profile_store.dart';
 import 'package:katch_mobile/state/reference_data_store.dart';
 
+import 'conversation_fakes.dart';
 import 'exploration_fakes.dart';
 
 /// Instante fixo dos testes.
@@ -464,8 +466,15 @@ class TestApp {
       clock = FakeClock(),
       monitor = ConnectionMonitor(),
       lifecycle = AppLifecycleMonitor(),
-      launcher = FakeLauncher() {
+      launcher = FakeLauncher(),
+      matches = FakeMatchService(),
+      conversationService = FakeConversationService() {
     session = SessionManager(storage: this.storage, clock: clock);
+    conversations = ConversationsStore(
+      service: conversationService,
+      session: session,
+      lifecycle: lifecycle,
+    );
     jobExploration = FakeJobExplorationService(
       clock: clock,
       preferences: () => profileService.profile.preferences,
@@ -486,6 +495,9 @@ class TestApp {
       lifecycle: lifecycle,
       jobExploration: jobExploration,
       launcher: launcher,
+      matches: matches,
+      conversationService: conversationService,
+      conversations: conversations,
     );
   }
 
@@ -498,6 +510,9 @@ class TestApp {
   final ConnectionMonitor monitor;
   final AppLifecycleMonitor lifecycle;
   final FakeLauncher launcher;
+  final FakeMatchService matches;
+  final FakeConversationService conversationService;
+  late final ConversationsStore conversations;
   late final FakeJobExplorationService jobExploration;
   late final SessionManager session;
   late final AppDependencies dependencies;
