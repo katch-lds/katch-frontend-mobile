@@ -66,7 +66,15 @@ as preferências, que também se abrem a partir da exploração (M08). Os cartõ
 preferências mudam e quando a aplicação regressa ao primeiro plano. O detalhe da vaga (M12) dá acesso à página de
 apresentação da Empresa (M13), cujo sítio na Internet abre no navegador (só endereços `http` e `https`).
 
-Os separadores «Matches» e «Conversas» ainda não estão disponíveis e mostram um aviso.
+## Matches e conversas
+
+O separador «Matches» (M14) lista os matches do Candidato, do mais recente para o mais antigo, e indica quando a vaga já
+não está publicada. Cada match abre o contacto da Empresa (M15), cujo correio eletrónico e telefone abrem nas
+aplicações do dispositivo, e a conversa. O separador «Conversas» (M16) lista as conversas com o total de mensagens por
+ler, também no ícone do separador. Na conversa (M17), o histórico completo é pedido ao abrir e as mensagens novas são
+consultadas de 3 em 3 segundos, só com a aplicação em primeiro plano. O Candidato pode enviar mensagens de 1 a 1000
+caracteres e encerrar a conversa; depois de encerrada, ou se a conta da Empresa for suspensa, fica só de consulta
+(M18).
 
 ## Estrutura
 
