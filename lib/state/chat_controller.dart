@@ -13,6 +13,7 @@ import '../session/session_manager.dart';
 import 'conversations_store.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
+import 'safe_change_notifier.dart';
 
 /// Estado dos ecrãs M17 (conversa) e M18 (conversa só de consulta), do UC14.
 ///
@@ -28,7 +29,7 @@ import 'load_status.dart';
 /// antiga dessas, para o servidor devolver também as mensagens do Candidato
 /// com o `readAt` atualizado; sem mensagens próprias por ler, usa o `sentAt` da
 /// última mensagem recebida.
-class ChatController extends ChangeNotifier {
+class ChatController extends SafeChangeNotifier {
   ChatController({
     required ConversationService service,
     required ConversationsStore store,
@@ -63,7 +64,6 @@ class ChatController extends ChangeNotifier {
   String? _errorMessage;
   bool _sending = false;
   bool _closing = false;
-  bool _disposed = false;
 
   String? get matchId => _matchId;
 
@@ -117,33 +117,33 @@ class ChatController extends ChangeNotifier {
     _matchId = matchId;
     _status = LoadStatus.loading;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     try {
       if (_store.find(matchId) == null) {
         _store.replace(await _service.list());
       }
       final messages = await _service.open(matchId);
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _messages = const [];
       _merge(messages);
       _status = LoadStatus.loaded;
     } on ApiException catch (failure) {
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _status = LoadStatus.failed;
       _errorMessage = failureMessage(failure);
     }
-    _notify();
+    notifyListeners();
     _syncPolling();
   }
 
   /// Texto da mensagem a enviar.
   void updateDraft(String value) {
     _draft = value;
-    _notify();
+    notifyListeners();
   }
 
   /// Envia a mensagem escrita (RF026). A mensagem gravada entra logo no
@@ -155,16 +155,16 @@ class ChatController extends ChangeNotifier {
     }
     _sending = true;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     try {
       final message = await _service.send(matchId, SendMessageRequest(_draft));
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _merge([message]);
       _draft = '';
     } on ApiRejection catch (rejection) {
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _errorMessage = rejection.message;
@@ -172,14 +172,14 @@ class ChatController extends ChangeNotifier {
         await _refreshSummary();
       }
     } on ApiException catch (failure) {
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _errorMessage = failureMessage(failure);
     } finally {
       _sending = false;
     }
-    _notify();
+    notifyListeners();
   }
 
   /// Encerra a conversa (RF030) e lê de novo a lista, para obter o estado, o
@@ -191,16 +191,16 @@ class ChatController extends ChangeNotifier {
     }
     _closing = true;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     try {
       await _service.close(matchId);
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _draft = '';
       await _refreshSummary();
     } on ApiRejection catch (rejection) {
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _errorMessage = rejection.message;
@@ -208,14 +208,14 @@ class ChatController extends ChangeNotifier {
         await _refreshSummary();
       }
     } on ApiException catch (failure) {
-      if (_disposed) {
+      if (disposed) {
         return;
       }
       _errorMessage = failureMessage(failure);
     } finally {
       _closing = false;
     }
-    _notify();
+    notifyListeners();
   }
 
   /// Consulta periódica: mensagens novas e estado da conversa.
@@ -224,20 +224,20 @@ class ChatController extends ChangeNotifier {
 
   Future<void> _pollTask() async {
     final matchId = _matchId;
-    if (matchId == null || _disposed || _status != LoadStatus.loaded) {
+    if (matchId == null || disposed || _status != LoadStatus.loaded) {
       return;
     }
     final received = await _service.open(matchId, after: _pollAfter());
-    if (_disposed || matchId != _matchId) {
+    if (disposed || matchId != _matchId) {
       return;
     }
     _merge(received);
     final conversations = await _service.list();
-    if (_disposed) {
+    if (disposed) {
       return;
     }
     _store.replace(conversations);
-    _notify();
+    notifyListeners();
   }
 
   /// `after` da consulta seguinte; `null` pede o histórico completo.
@@ -275,7 +275,7 @@ class ChatController extends ChangeNotifier {
   Future<void> _refreshSummary() async {
     try {
       final conversations = await _service.list();
-      if (!_disposed) {
+      if (!disposed) {
         _store.replace(conversations);
       }
     } on ApiException {
@@ -284,7 +284,7 @@ class ChatController extends ChangeNotifier {
   }
 
   void _syncPolling() {
-    if (!_disposed && _status == LoadStatus.loaded && _lifecycle.inForeground) {
+    if (!disposed && _status == LoadStatus.loaded && _lifecycle.inForeground) {
       _messagesPolling.start();
     } else {
       _messagesPolling.stop();
@@ -295,15 +295,8 @@ class ChatController extends ChangeNotifier {
   /// consulta logo e retoma o ciclo.
   void _onLifecycleChanged() => _syncPolling();
 
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
   @override
   void dispose() {
-    _disposed = true;
     _messagesPolling.stop();
     _lifecycle.removeListener(_onLifecycleChanged);
     super.dispose();
