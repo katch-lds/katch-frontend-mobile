@@ -10,17 +10,23 @@ class KatchScaffold extends StatelessWidget {
     super.key,
     required this.title,
     required this.body,
+    this.actions,
+    this.bottom,
     this.bottomNavigationBar,
   });
 
   final String title;
   final Widget body;
+  final List<Widget>? actions;
+
+  /// Linha por baixo do título.
+  final PreferredSizeWidget? bottom;
   final Widget? bottomNavigationBar;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(title), actions: actions, bottom: bottom),
       body: Column(
         children: [
           ConnectionBanner(monitor: AppScope.of(context).monitor),

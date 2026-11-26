@@ -100,41 +100,41 @@ class _MatchesScreenState extends State<MatchesScreen> {
         if (status == LoadStatus.idle) {
           return const SizedBox.shrink();
         }
-        if (status == LoadStatus.loading) {
-          return const LoadStateView.loading();
-        }
-        if (status == LoadStatus.failed) {
-          return LoadStateView.failed(
-            message: _controller.message,
-            onRetry: () => unawaited(_controller.load()),
-            fallback: MatchesScreen.failedFallback,
-          );
-        }
-        final matches = _controller.matches;
-        if (matches.isEmpty) {
-          return EmptyStateView(
-            title: MatchesScreen.emptyTitle,
-            hint: MatchesScreen.emptyHint,
-            actionLabel: 'Explorar vagas',
-            onAction: widget.onExplore,
-          );
-        }
-        return RefreshIndicator(
-          onRefresh: _controller.load,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            children: [
-              FormMessage(message: _controller.message),
-              for (final match in matches)
-                MatchTile(
-                  match: match,
-                  onContact: () => _openContact(match),
-                  onConversation: () => _openConversation(match),
-                ),
-            ],
-          ),
+        return LoadStatusView(
+          failed: status == LoadStatus.failed,
+          message: _controller.message,
+          fallback: MatchesScreen.failedFallback,
+          onRetry: () => unawaited(_controller.load()),
+          child: status == LoadStatus.loaded ? _buildList() : null,
         );
       },
+    );
+  }
+
+  Widget _buildList() {
+    final matches = _controller.matches;
+    if (matches.isEmpty) {
+      return EmptyStateView(
+        title: MatchesScreen.emptyTitle,
+        hint: MatchesScreen.emptyHint,
+        actionLabel: 'Explorar vagas',
+        onAction: widget.onExplore,
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _controller.load,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        children: [
+          FormMessage(message: _controller.message),
+          for (final match in matches)
+            MatchTile(
+              match: match,
+              onContact: () => _openContact(match),
+              onConversation: () => _openConversation(match),
+            ),
+        ],
+      ),
     );
   }
 }

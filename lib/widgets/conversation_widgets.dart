@@ -150,7 +150,6 @@ class MessageComposer extends StatelessWidget {
               maxLength: InputRules.maxMessageLength,
               decoration: const InputDecoration(
                 hintText: 'Escreva uma mensagem',
-                border: OutlineInputBorder(),
               ),
             ),
           ),

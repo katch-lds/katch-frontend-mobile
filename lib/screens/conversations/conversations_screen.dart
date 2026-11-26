@@ -92,40 +92,40 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         if (status == LoadStatus.idle) {
           return const SizedBox.shrink();
         }
-        if (status == LoadStatus.loading) {
-          return const LoadStateView.loading();
-        }
-        if (status == LoadStatus.failed) {
-          return LoadStateView.failed(
-            message: _store.message,
-            onRetry: () => unawaited(_store.load()),
-            fallback: ConversationsScreen.failedFallback,
-          );
-        }
-        final conversations = _store.conversations;
-        if (conversations.isEmpty) {
-          return EmptyStateView(
-            title: ConversationsScreen.emptyTitle,
-            hint: ConversationsScreen.emptyHint,
-            actionLabel: 'Ver matches',
-            onAction: widget.onOpenMatches,
-          );
-        }
-        return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FormMessage(message: _store.message),
-            ),
-            for (final conversation in conversations)
-              ConversationTile(
-                conversation: conversation,
-                onTap: () => unawaited(_openChat(conversation.matchId)),
-              ),
-          ],
+        return LoadStatusView(
+          failed: status == LoadStatus.failed,
+          message: _store.message,
+          fallback: ConversationsScreen.failedFallback,
+          onRetry: () => unawaited(_store.load()),
+          child: status == LoadStatus.loaded ? _buildList() : null,
         );
       },
+    );
+  }
+
+  Widget _buildList() {
+    final conversations = _store.conversations;
+    if (conversations.isEmpty) {
+      return EmptyStateView(
+        title: ConversationsScreen.emptyTitle,
+        hint: ConversationsScreen.emptyHint,
+        actionLabel: 'Ver matches',
+        onAction: widget.onOpenMatches,
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: FormMessage(message: _store.message),
+        ),
+        for (final conversation in conversations)
+          ConversationTile(
+            conversation: conversation,
+            onTap: () => unawaited(_openChat(conversation.matchId)),
+          ),
+      ],
     );
   }
 }
