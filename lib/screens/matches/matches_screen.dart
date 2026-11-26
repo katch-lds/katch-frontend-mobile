@@ -13,7 +13,7 @@ import '../../widgets/match_widgets.dart';
 import '../conversations/chat_screen.dart';
 import 'match_contact_screen.dart';
 
-/// Lista de matches, M14 (modelo de classes, 8.5 e 9.1; UC13; RF024).
+/// Lista de matches, M14 (UC13; RF024).
 ///
 /// A lista é pedida ao montar o separador e sempre que o Candidato o volta a
 /// escolher (`active` passa a verdadeiro). Daqui chega-se ao contacto da

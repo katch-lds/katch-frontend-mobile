@@ -11,11 +11,11 @@ import '../../widgets/form_message.dart';
 import '../../widgets/load_state_view.dart';
 import 'chat_screen.dart';
 
-/// Lista de conversas, M16, com o contador de mensagens por ler (modelo de
-/// classes, 8.5 e 9.1; UC14; RF027).
+/// Lista de conversas, M16, com o contador de mensagens por ler (UC14;
+/// RF027).
 ///
 /// Enquanto o separador está escolhido e nenhuma conversa está aberta por
-/// cima, a lista é consultada de 3 em 3 segundos (RF029; secção 7, regra 1).
+/// cima, a lista é consultada de 3 em 3 segundos (RF029).
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({
     super.key,

@@ -11,8 +11,8 @@ import '../../widgets/conversation_widgets.dart';
 import '../../widgets/form_message.dart';
 import '../../widgets/load_state_view.dart';
 
-/// Conversa com o Recrutador, M17, e o estado só de consulta, M18 (modelo de
-/// classes, 8.5 e 9.1; UC14; RF026, RF028 a RF030, RF070, RF075).
+/// Conversa com o Recrutador, M17, e o estado só de consulta, M18 (UC14;
+/// RF026, RF028 a RF030, RF070, RF075).
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.matchId});
 

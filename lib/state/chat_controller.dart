@@ -14,8 +14,7 @@ import 'conversations_store.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado dos ecrãs M17 (conversa) e M18 (conversa só de consulta) (modelo de
-/// classes, 8.5 e secção 7; UC14).
+/// Estado dos ecrãs M17 (conversa) e M18 (conversa só de consulta), do UC14.
 ///
 /// Abre a conversa com o histórico completo, que o servidor marca como lido
 /// (RF028, RF108), envia (RF026) e encerra (RF030). Enquanto o ecrã está
@@ -28,7 +27,7 @@ import 'load_status.dart';
 /// ler, a consulta usa como `after` o `sentAt` da mensagem anterior à mais
 /// antiga dessas, para o servidor devolver também as mensagens do Candidato
 /// com o `readAt` atualizado; sem mensagens próprias por ler, usa o `sentAt` da
-/// última mensagem recebida (secção 7, regra 3).
+/// última mensagem recebida.
 class ChatController extends ChangeNotifier {
   ChatController({
     required ConversationService service,
@@ -48,7 +47,7 @@ class ChatController extends ChangeNotifier {
   static const maxLength = InputRules.maxMessageLength;
 
   /// Conversa em modo apenas de consulta (ERR-36) ou sem match (ERR-37):
-  /// o estado da conversa é lido de novo (secção 7, regra 5).
+  /// o estado da conversa é lido de novo.
   static const readOnlyCodes = {'ERR-36', 'ERR-37'};
 
   final ConversationService _service;
@@ -148,7 +147,7 @@ class ChatController extends ChangeNotifier {
   }
 
   /// Envia a mensagem escrita (RF026). A mensagem gravada entra logo no
-  /// histórico (secção 7, regra 4).
+  /// histórico.
   Future<void> send() async {
     final matchId = _matchId;
     if (matchId == null || !canSend) {
@@ -219,7 +218,7 @@ class ChatController extends ChangeNotifier {
     _notify();
   }
 
-  /// Consulta periódica: mensagens novas e estado da conversa (secção 7).
+  /// Consulta periódica: mensagens novas e estado da conversa.
   @visibleForTesting
   Future<void> poll() => _pollTask();
 
@@ -293,7 +292,7 @@ class ChatController extends ChangeNotifier {
   }
 
   /// Em segundo plano a consulta suspende-se; ao voltar ao primeiro plano,
-  /// consulta logo e retoma o ciclo (secção 7).
+  /// consulta logo e retoma o ciclo.
   void _onLifecycleChanged() => _syncPolling();
 
   void _notify() {

@@ -7,8 +7,8 @@ import '../services/match_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado dos ecrãs M14 (lista de matches) e M15 (contacto da Empresa)
-/// (modelo de classes, 8.5; UC13).
+/// Estado dos ecrãs M14 (lista de matches) e M15 (contacto da Empresa), do
+/// UC13.
 ///
 /// A lista é pedida ao abrir o separador «Matches», que é onde o Candidato vê
 /// um novo match (DA v04, F008). Os contactos já vêm no `MatchDto`, pelo que

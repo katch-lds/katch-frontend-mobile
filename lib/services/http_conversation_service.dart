@@ -52,7 +52,7 @@ class HttpConversationService implements ConversationService {
   }
 
   /// `after` é sempre o `sentAt` de uma mensagem recebida do servidor, em UTC
-  /// e no formato ISO 8601 (API v02, 6.8.2; modelo de classes, secção 7).
+  /// e no formato ISO 8601 (API v02, 6.8.2).
   static String _afterQuery(DateTime? after) {
     if (after == null) {
       return '';

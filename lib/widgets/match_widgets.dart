@@ -5,7 +5,7 @@ import 'remote_image.dart';
 
 /// Linha de um match da lista M14, com o logótipo da Empresa, a vaga, a
 /// localidade, o estado da vaga e as ações «Ver contacto» e «Abrir conversa»
-/// (modelo de classes, 9.4; RF024).
+/// (RF024).
 class MatchTile extends StatelessWidget {
   const MatchTile({
     super.key,
@@ -82,8 +82,7 @@ class MatchTile extends StatelessWidget {
   }
 }
 
-/// Linha de contacto que abre a aplicação externa (modelo de classes, 9.4;
-/// RF025).
+/// Linha de contacto que abre a aplicação externa (RF025).
 class ContactRow extends StatelessWidget {
   const ContactRow({
     super.key,

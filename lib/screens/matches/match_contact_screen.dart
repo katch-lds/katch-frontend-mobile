@@ -10,9 +10,8 @@ import '../../widgets/job_formats.dart';
 import '../../widgets/match_widgets.dart';
 import '../conversations/chat_screen.dart';
 
-/// Contacto da Empresa depois do match, M15 (modelo de classes, 8.5 e 9.1;
-/// RF025). Partilha o `MatchesController` de M14: os contactos já vêm na
-/// lista, sem novo pedido.
+/// Contacto da Empresa depois do match, M15 (RF025). Partilha o
+/// `MatchesController` de M14: os contactos já vêm na lista, sem novo pedido.
 class MatchContactScreen extends StatelessWidget {
   const MatchContactScreen({
     super.key,

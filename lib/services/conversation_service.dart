@@ -1,7 +1,7 @@
 import '../models/conversation_summary_dto.dart';
 import '../models/message_dto.dart';
 
-/// Conversas do Candidato (modelo de classes, secção 5; API v02, 6.8).
+/// Conversas do Candidato (API v02, 6.8).
 abstract interface class ConversationService {
   /// Todas as conversas do Candidato, com as mensagens por ler e o estado de
   /// cada uma (RF027, RF075).

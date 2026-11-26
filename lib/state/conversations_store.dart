@@ -10,15 +10,14 @@ import 'failure_messages.dart';
 import 'load_status.dart';
 import 'session_scoped_store.dart';
 
-/// Lista de conversas do Candidato e total de mensagens por ler (modelo de
-/// classes, 8.1 e 8.5; secção 7).
+/// Lista de conversas do Candidato e total de mensagens por ler.
 ///
 /// Enquanto a lista de conversas (M16) está apresentada (`watchList(true)`) e
 /// a aplicação está em primeiro plano, a lista é pedida de 3 em 3 segundos
 /// (RF027, RF029). Fora de M16, é pedida uma vez quando o Candidato escolhe os
 /// separadores «Matches» ou «Conversas» e quando a aplicação volta ao primeiro
-/// plano, para o contador do separador (regra 7 da secção 7). A conversa aberta
-/// (`ChatController`) entrega-lhe a lista que pede na sua consulta periódica.
+/// plano, para o contador do separador. A conversa aberta (`ChatController`)
+/// entrega-lhe a lista que pede na sua consulta periódica.
 class ConversationsStore extends SessionScopedStore {
   ConversationsStore({
     required ConversationService service,
@@ -106,14 +105,13 @@ class ConversationsStore extends SessionScopedStore {
   }
 
   /// Ativa a consulta periódica com M16 apresentado e desativa-a quando deixa
-  /// de o estar (secção 7, regra 1).
+  /// de o estar.
   void watchList(bool active) {
     _watching = active;
     _syncPolling();
   }
 
-  /// Lista obtida pela consulta periódica de uma conversa aberta (secção 7,
-  /// regra 5).
+  /// Lista obtida pela consulta periódica de uma conversa aberta.
   void replace(List<ConversationSummaryDto> conversations) {
     _conversations = conversations;
     _status = LoadStatus.loaded;
@@ -132,7 +130,7 @@ class ConversationsStore extends SessionScopedStore {
   }
 
   /// Em segundo plano não há consultas; ao voltar ao primeiro plano, a lista
-  /// é pedida logo, para o contador do separador (regra 7).
+  /// é pedida logo, para o contador do separador.
   void _onLifecycleChanged() {
     final foreground = _lifecycle.inForeground;
     final returned = foreground && !_inForeground;
