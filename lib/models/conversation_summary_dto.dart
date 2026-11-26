@@ -1,7 +1,7 @@
 import 'json.dart';
 
 /// Estado de uma conversa (`ConversationStatus`, API v02, secção 2.4).
-enum ConversationStatus {
+enum ConversationStatus with WireValue {
   open('OPEN'),
 
   /// Modo apenas de consulta (RF030, RF075).
@@ -9,20 +9,15 @@ enum ConversationStatus {
 
   const ConversationStatus(this.wire);
 
+  @override
   final String wire;
 
-  static ConversationStatus fromWire(String value) {
-    for (final item in values) {
-      if (item.wire == value) {
-        return item;
-      }
-    }
-    throw FormatException('Estado de conversa desconhecido: $value');
-  }
+  static ConversationStatus fromWire(String value) =>
+      values.byWire(value, 'Estado de conversa desconhecido');
 }
 
 /// Motivo do encerramento (`ConversationCloseReason`, API v02, secção 2.4).
-enum ConversationCloseReason {
+enum ConversationCloseReason with WireValue {
   /// Encerrada pelo Candidato ou pelo Recrutador (RF030, RF074).
   closedByParty('CLOSED_BY_PARTY'),
 
@@ -34,16 +29,11 @@ enum ConversationCloseReason {
 
   const ConversationCloseReason(this.wire);
 
+  @override
   final String wire;
 
-  static ConversationCloseReason fromWire(String value) {
-    for (final item in values) {
-      if (item.wire == value) {
-        return item;
-      }
-    }
-    throw FormatException('Motivo de encerramento desconhecido: $value');
-  }
+  static ConversationCloseReason fromWire(String value) =>
+      values.byWire(value, 'Motivo de encerramento desconhecido');
 }
 
 /// Resumo de uma conversa (`ConversationSummaryDto`, API v02, 6.8.1 e 8.4).
