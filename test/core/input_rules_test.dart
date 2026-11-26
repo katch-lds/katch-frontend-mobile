@@ -105,11 +105,11 @@ void main() {
     expect(InputRules.maxFileBytes, 5242880);
   });
 
-  test('isValidLink exige http:// ou https:// (P10)', () {
-    expect(InputRules.isValidLink('https://exemplo.pt'), isTrue);
-    expect(InputRules.isValidLink(' HTTP://exemplo.pt '), isTrue);
-    expect(InputRules.isValidLink('exemplo.pt'), isFalse);
-    expect(InputRules.isValidLink('ftp://exemplo.pt'), isFalse);
+  test('linkError exige http:// ou https:// (P10)', () {
+    expect(InputRules.linkError('https://exemplo.pt'), isNull);
+    expect(InputRules.linkError(' HTTP://exemplo.pt '), isNull);
+    expect(InputRules.linkError('exemplo.pt'), InputRules.linkReason);
+    expect(InputRules.linkError('ftp://exemplo.pt'), InputRules.linkReason);
   });
 
   test('isValidSummary aceita 1000 caracteres e rejeita 1001 (P08)', () {

@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Etiqueta de competência, removível com um toque (modelo de classes, 9.4;
-/// RF008, RF009).
+/// Etiqueta de competência, removível com um toque (RF008, RF009).
 ///
 /// As competências da opção «Outro» têm um ícone que as distingue das da
 /// lista pré-definida.

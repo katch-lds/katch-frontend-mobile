@@ -108,19 +108,12 @@ void main() {
     expect(() => ContractType.fromWire('X'), throwsFormatException);
   });
 
-  test('FileSelection indica a extensão, o tipo e o início do conteúdo', () {
+  test('FileSelection indica a extensão e o início do conteúdo', () {
     final file = FileSelection.fromBytes('Foto.JPG', List.filled(20, 1));
 
     expect(file.extension, '.jpg');
-    expect(file.mimeType, 'image/jpeg');
     expect(file.sizeBytes, 20);
     expect(file.header, hasLength(FileSelection.headerLength));
-    expect(FileSelection.fromBytes('a.png', []).mimeType, 'image/png');
-    expect(FileSelection.fromBytes('a.pdf', []).mimeType, 'application/pdf');
     expect(FileSelection.fromBytes('sem', []).extension, '');
-    expect(
-      FileSelection.fromBytes('sem', []).mimeType,
-      'application/octet-stream',
-    );
   });
 }

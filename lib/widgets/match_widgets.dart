@@ -1,18 +1,15 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../core/credential_provider.dart';
 import '../models/match_dto.dart';
 import 'remote_image.dart';
 
 /// Linha de um match da lista M14, com o logótipo da Empresa, a vaga, a
 /// localidade, o estado da vaga e as ações «Ver contacto» e «Abrir conversa»
-/// (modelo de classes, 9.4; RF024).
+/// (RF024).
 class MatchTile extends StatelessWidget {
   const MatchTile({
     super.key,
     required this.match,
-    required this.baseUrl,
-    required this.credentials,
     required this.onContact,
     required this.onConversation,
   });
@@ -21,8 +18,6 @@ class MatchTile extends StatelessWidget {
   static const closedJobLabel = 'Vaga encerrada';
 
   final MatchDto match;
-  final String baseUrl;
-  final CredentialProvider credentials;
   final VoidCallback onContact;
   final VoidCallback onConversation;
 
@@ -39,12 +34,7 @@ class MatchTile extends StatelessWidget {
           children: [
             Row(
               children: [
-                RemoteImage(
-                  url: match.logoUrl,
-                  baseUrl: baseUrl,
-                  credentials: credentials,
-                  size: 48,
-                ),
+                RemoteImage(url: match.logoUrl, size: 48),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -92,8 +82,7 @@ class MatchTile extends StatelessWidget {
   }
 }
 
-/// Linha de contacto que abre a aplicação externa (modelo de classes, 9.4;
-/// RF025).
+/// Linha de contacto que abre a aplicação externa (RF025).
 class ContactRow extends StatelessWidget {
   const ContactRow({
     super.key,

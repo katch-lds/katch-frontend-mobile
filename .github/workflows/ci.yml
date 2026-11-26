@@ -39,6 +39,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # A versão do modelo de classes e do pubspec.lock: uma nova stable não muda a pipeline.
+          flutter-version: 3.47.x
           cache: true
 
       - name: Versões
@@ -108,6 +110,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          # A versão do modelo de classes e do pubspec.lock: uma nova stable não muda a pipeline.
+          flutter-version: 3.47.x
           cache: true
 
       - name: Instalar dependências

@@ -1,7 +1,7 @@
 import 'json.dart';
 
 /// Estado de uma vaga (`JobStatus`, API v02, secção 2.4).
-enum JobStatus {
+enum JobStatus with WireValue {
   unpublished('UNPUBLISHED', 'Não publicada'),
   published('PUBLISHED', 'Publicada'),
   suspended('SUSPENDED', 'Suspensa'),
@@ -10,20 +10,15 @@ enum JobStatus {
   const JobStatus(this.wire, this.label);
 
   /// Valor usado no JSON da API.
+  @override
   final String wire;
 
   /// Designação apresentada ao Candidato.
   final String label;
 
   /// Converte o valor do JSON; um valor desconhecido é rejeitado.
-  static JobStatus fromWire(String value) {
-    for (final item in values) {
-      if (item.wire == value) {
-        return item;
-      }
-    }
-    throw FormatException('Estado de vaga desconhecido: $value');
-  }
+  static JobStatus fromWire(String value) =>
+      values.byWire(value, 'Estado de vaga desconhecido');
 }
 
 /// Match confirmado do Candidato (`MatchDto`, API v02, 6.7.1 e 8.4).

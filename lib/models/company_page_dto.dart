@@ -22,10 +22,7 @@ final class CompanyPageDto {
       description: json['description'] as String?,
       website: json['website'] as String?,
       logoUrl: json['logoUrl'] as String?,
-      photoUrls: [
-        for (final url in json['photoUrls'] as List<Object?>? ?? const [])
-          url as String,
-      ],
+      photoUrls: readStrings(json['photoUrls']),
     );
   }
 

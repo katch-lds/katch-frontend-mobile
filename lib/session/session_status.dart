@@ -1,4 +1,4 @@
-/// Estado da sessão (modelo de classes do mobile v02, secção 6).
+/// Estado da sessão.
 enum SessionStatus {
   /// A ler a sessão do armazenamento seguro, no arranque.
   restoring,

@@ -4,13 +4,15 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/app_scope.dart';
 import '../../core/input_rules.dart';
+import '../../models/candidate_profile_dto.dart';
 import '../../models/file_selection.dart';
+import '../../state/failure_messages.dart';
 import '../../state/load_status.dart';
 import '../../state/profile_files_controller.dart';
 import '../../state/profile_store.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/field_error_text.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/remote_image.dart';
 import '../../widgets/save_button.dart';
@@ -64,147 +66,127 @@ class _ProfileFilesScreenState extends State<ProfileFilesScreen> {
     if (!saved || !mounted) {
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(ProfileFilesScreen.successMessage)),
-    );
+    showSuccess(context, ProfileFilesScreen.successMessage);
   }
 
   @override
   Widget build(BuildContext context) {
-    final dependencies = AppScope.of(context);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Ficheiros e hiperligações')),
-      body: Column(
+    return KatchScaffold(
+      title: 'Ficheiros e hiperligações',
+      body: ListenableBuilder(
+        listenable: Listenable.merge([_controller, _store]),
+        builder: (context, _) {
+          final profile = _store.profile;
+          return LoadStatusView(
+            failed: profile == null && _store.status == LoadStatus.failed,
+            message: _store.errorMessage,
+            fallback: profileFailureMessage,
+            onRetry: () => unawaited(_load()),
+            child: profile == null ? null : _buildContent(context, profile),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, CandidateProfileDto profile) {
+    final loading = _controller.status == LoadStatus.loading;
+    final errors = _controller.errors;
+    final drafts = _controller.linkDrafts;
+    return SingleChildScrollView(
+      key: const Key('files-list'),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ConnectionBanner(monitor: dependencies.monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: Listenable.merge([_controller, _store]),
-              builder: (context, _) {
-                final profile = _store.profile;
-                if (profile == null) {
-                  return _store.status == LoadStatus.failed
-                      ? LoadStateView.failed(
-                          message: null,
-                          onRetry: () => unawaited(_load()),
-                        )
-                      : const LoadStateView.loading();
-                }
-                final loading = _controller.status == LoadStatus.loading;
-                final errors = _controller.errors;
-                final drafts = _controller.linkDrafts;
-                return SingleChildScrollView(
-                  key: const Key('files-list'),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _SectionTitle('Fotografia'),
-                      Row(
-                        children: [
-                          RemoteImage(
-                            key: const Key('files-photo'),
-                            url: profile.photoUrl,
-                            baseUrl: dependencies.config.apiBaseUrl,
-                            credentials: dependencies.session,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _FileChoice(
-                              selection: _controller.photo,
-                              empty: 'Nenhuma fotografia escolhida.',
-                              hint: ProfileFilesScreen.photoHint,
-                              buttonKey: const Key('files-pick-photo'),
-                              buttonLabel: 'Escolher fotografia',
-                              enabled: !loading,
-                              onPick: _controller.pickPhoto,
-                              error: errors.reasonFor(
-                                ProfileFilesController.photoField,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      const _SectionTitle('Curriculum vitae'),
-                      Text(
-                        profile.hasCv
-                            ? 'Curriculum vitae enviado.'
-                            : 'Sem curriculum vitae.',
-                        key: const Key('files-cv-status'),
-                      ),
-                      const SizedBox(height: 8),
-                      _FileChoice(
-                        selection: _controller.cv,
-                        empty: 'Nenhum PDF escolhido.',
-                        hint: ProfileFilesScreen.cvHint,
-                        buttonKey: const Key('files-pick-cv'),
-                        buttonLabel: 'Escolher PDF',
-                        enabled: !loading,
-                        onPick: _controller.pickCv,
-                        error: errors.reasonFor(ProfileFilesController.cvField),
-                      ),
-                      const SizedBox(height: 24),
-                      const _SectionTitle(
-                        'Hiperligações (até ${InputRules.maxLinks})',
-                      ),
-                      for (var index = 0; index < drafts.length; index++)
-                        KeyedSubtree(
-                          key: ValueKey(drafts[index].key),
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: TextFormField(
-                              key: Key('files-link-$index'),
-                              initialValue: drafts[index].url,
-                              enabled: !loading,
-                              keyboardType: TextInputType.url,
-                              decoration: InputDecoration(
-                                labelText: 'Hiperligação ${index + 1}',
-                                hintText: 'https://',
-                                errorText: errors.reasonFor(
-                                  ProfileFilesController.linkField(index),
-                                ),
-                                errorMaxLines: 3,
-                                border: const OutlineInputBorder(),
-                                suffixIcon: IconButton(
-                                  key: Key('files-link-remove-$index'),
-                                  tooltip: 'Retirar',
-                                  icon: const Icon(Icons.close),
-                                  onPressed: loading
-                                      ? null
-                                      : () => _controller.removeLink(index),
-                                ),
-                              ),
-                              onChanged: (value) =>
-                                  _controller.setLink(index, value),
-                            ),
-                          ),
-                        ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          key: const Key('files-add-link'),
-                          onPressed: loading ? null : _controller.addLink,
-                          icon: const Icon(Icons.add_link),
-                          label: const Text('Adicionar hiperligação'),
-                        ),
-                      ),
-                      FieldErrorText(
-                        errors.reasonFor(ProfileFilesController.linksField),
-                        key: const Key('files-links-error'),
-                      ),
-                      FormMessage(message: _controller.errorMessage),
-                      const SizedBox(height: 8),
-                      SaveButton(
-                        key: const Key('files-save'),
-                        loading: loading,
-                        onPressed: _save,
-                      ),
-                    ],
+          const _SectionTitle('Fotografia'),
+          Row(
+            children: [
+              RemoteImage(key: const Key('files-photo'), url: profile.photoUrl),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _FileChoice(
+                  selection: _controller.photo,
+                  empty: 'Nenhuma fotografia escolhida.',
+                  hint: ProfileFilesScreen.photoHint,
+                  buttonKey: const Key('files-pick-photo'),
+                  buttonLabel: 'Escolher fotografia',
+                  enabled: !loading,
+                  onPick: _controller.pickPhoto,
+                  error: errors.reasonFor(ProfileFilesController.photoField),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Curriculum vitae'),
+          Text(
+            profile.hasCv
+                ? 'Curriculum vitae enviado.'
+                : 'Sem curriculum vitae.',
+            key: const Key('files-cv-status'),
+          ),
+          const SizedBox(height: 8),
+          _FileChoice(
+            selection: _controller.cv,
+            empty: 'Nenhum PDF escolhido.',
+            hint: ProfileFilesScreen.cvHint,
+            buttonKey: const Key('files-pick-cv'),
+            buttonLabel: 'Escolher PDF',
+            enabled: !loading,
+            onPick: _controller.pickCv,
+            error: errors.reasonFor(ProfileFilesController.cvField),
+          ),
+          const SizedBox(height: 24),
+          const _SectionTitle('Hiperligações (até ${InputRules.maxLinks})'),
+          for (var index = 0; index < drafts.length; index++)
+            KeyedSubtree(
+              key: ValueKey(drafts[index].key),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextFormField(
+                  key: Key('files-link-$index'),
+                  initialValue: drafts[index].url,
+                  enabled: !loading,
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    labelText: 'Hiperligação ${index + 1}',
+                    hintText: 'https://',
+                    errorText: errors.reasonFor(
+                      ProfileFilesController.linkField(index),
+                    ),
+                    suffixIcon: IconButton(
+                      key: Key('files-link-remove-$index'),
+                      tooltip: 'Retirar',
+                      icon: const Icon(Icons.close),
+                      onPressed: loading
+                          ? null
+                          : () => _controller.removeLink(index),
+                    ),
                   ),
-                );
-              },
+                  onChanged: (value) => _controller.setLink(index, value),
+                ),
+              ),
             ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('files-add-link'),
+              onPressed: loading ? null : _controller.addLink,
+              icon: const Icon(Icons.add_link),
+              label: const Text('Adicionar hiperligação'),
+            ),
+          ),
+          FieldErrorText(
+            errors.reasonFor(ProfileFilesController.linksField),
+            key: const Key('files-links-error'),
+          ),
+          FormMessage(message: _controller.errorMessage),
+          const SizedBox(height: 8),
+          SaveButton(
+            key: const Key('files-save'),
+            loading: loading,
+            onPressed: _save,
           ),
         ],
       ),

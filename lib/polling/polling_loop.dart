@@ -1,6 +1,6 @@
 import 'dart:async';
 
-/// Repete uma tarefa a intervalo fixo, sem sobrepor execuções (secção 7).
+/// Repete uma tarefa a intervalo fixo, sem sobrepor execuções.
 class PollingLoop {
   PollingLoop(this._task, {this.interval = defaultInterval});
 

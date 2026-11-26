@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Estado sem conteúdo, com a ação sugerida (modelo de classes, 9.4).
+/// Estado sem conteúdo, com a ação sugerida.
 class EmptyStateView extends StatelessWidget {
   const EmptyStateView({
     super.key,

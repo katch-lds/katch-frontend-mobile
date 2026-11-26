@@ -13,7 +13,7 @@ import '../../widgets/match_widgets.dart';
 import '../conversations/chat_screen.dart';
 import 'match_contact_screen.dart';
 
-/// Lista de matches, M14 (modelo de classes, 8.5 e 9.1; UC13; RF024).
+/// Lista de matches, M14 (UC13; RF024).
 ///
 /// A lista é pedida ao montar o separador e sempre que o Candidato o volta a
 /// escolher (`active` passa a verdadeiro). Daqui chega-se ao contacto da
@@ -100,44 +100,41 @@ class _MatchesScreenState extends State<MatchesScreen> {
         if (status == LoadStatus.idle) {
           return const SizedBox.shrink();
         }
-        if (status == LoadStatus.loading) {
-          return const LoadStateView.loading();
-        }
-        if (status == LoadStatus.failed) {
-          return LoadStateView.failed(
-            message: _controller.message,
-            onRetry: () => unawaited(_controller.load()),
-            fallback: MatchesScreen.failedFallback,
-          );
-        }
-        final matches = _controller.matches;
-        if (matches.isEmpty) {
-          return EmptyStateView(
-            title: MatchesScreen.emptyTitle,
-            hint: MatchesScreen.emptyHint,
-            actionLabel: 'Explorar vagas',
-            onAction: widget.onExplore,
-          );
-        }
-        final dependencies = AppScope.of(context);
-        return RefreshIndicator(
-          onRefresh: _controller.load,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            children: [
-              FormMessage(message: _controller.message),
-              for (final match in matches)
-                MatchTile(
-                  match: match,
-                  baseUrl: dependencies.config.apiBaseUrl,
-                  credentials: dependencies.session,
-                  onContact: () => _openContact(match),
-                  onConversation: () => _openConversation(match),
-                ),
-            ],
-          ),
+        return LoadStatusView(
+          failed: status == LoadStatus.failed,
+          message: _controller.message,
+          fallback: MatchesScreen.failedFallback,
+          onRetry: () => unawaited(_controller.load()),
+          child: status == LoadStatus.loaded ? _buildList() : null,
         );
       },
+    );
+  }
+
+  Widget _buildList() {
+    final matches = _controller.matches;
+    if (matches.isEmpty) {
+      return EmptyStateView(
+        title: MatchesScreen.emptyTitle,
+        hint: MatchesScreen.emptyHint,
+        actionLabel: 'Explorar vagas',
+        onAction: widget.onExplore,
+      );
+    }
+    return RefreshIndicator(
+      onRefresh: _controller.load,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        children: [
+          FormMessage(message: _controller.message),
+          for (final match in matches)
+            MatchTile(
+              match: match,
+              onContact: () => _openContact(match),
+              onConversation: () => _openConversation(match),
+            ),
+        ],
+      ),
     );
   }
 }

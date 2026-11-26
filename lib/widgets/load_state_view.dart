@@ -1,7 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Indicador de carregamento e de erro, com a ação de repetir (modelo de
-/// classes, 9.4; RNF014).
+/// Indicador de carregamento e de erro, com a ação de repetir (RNF014).
 class LoadStateView extends StatelessWidget {
   /// Pedido em curso.
   const LoadStateView.loading({super.key})
@@ -14,7 +13,7 @@ class LoadStateView extends StatelessWidget {
     super.key,
     required this.message,
     required VoidCallback this.onRetry,
-    this.fallback = 'Não foi possível obter o perfil.',
+    required this.fallback,
   });
 
   /// Motivo da falha (por exemplo, a indicação de falha de ligação).
@@ -49,5 +48,38 @@ class LoadStateView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Falha, carregamento ou conteúdo de um ecrã que pede dados: a falha
+/// prevalece e, sem [child], o pedido está em curso.
+class LoadStatusView extends StatelessWidget {
+  const LoadStatusView({
+    super.key,
+    required this.failed,
+    required this.message,
+    required this.fallback,
+    required this.onRetry,
+    required this.child,
+  });
+
+  final bool failed;
+  final String? message;
+  final String fallback;
+  final VoidCallback onRetry;
+
+  /// Conteúdo do ecrã, ou `null` enquanto os dados não chegam.
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (failed) {
+      return LoadStateView.failed(
+        message: message,
+        fallback: fallback,
+        onRetry: onRetry,
+      );
+    }
+    return child ?? const LoadStateView.loading();
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// Indica se a aplicação está em primeiro plano (modelo de classes, secção 7).
+/// Indica se a aplicação está em primeiro plano.
 ///
 /// É registado no `WidgetsBinding` em `main.dart` e avisa quem o observa
 /// quando a aplicação muda de plano: a área de exploração volta a pedir a quota

@@ -11,11 +11,11 @@ import '../../widgets/form_message.dart';
 import '../../widgets/load_state_view.dart';
 import 'chat_screen.dart';
 
-/// Lista de conversas, M16, com o contador de mensagens por ler (modelo de
-/// classes, 8.5 e 9.1; UC14; RF027).
+/// Lista de conversas, M16, com o contador de mensagens por ler (UC14;
+/// RF027).
 ///
 /// Enquanto o separador está escolhido e nenhuma conversa está aberta por
-/// cima, a lista é consultada de 3 em 3 segundos (RF029; secção 7, regra 1).
+/// cima, a lista é consultada de 3 em 3 segundos (RF029).
 class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({
     super.key,
@@ -92,40 +92,40 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
         if (status == LoadStatus.idle) {
           return const SizedBox.shrink();
         }
-        if (status == LoadStatus.loading) {
-          return const LoadStateView.loading();
-        }
-        if (status == LoadStatus.failed) {
-          return LoadStateView.failed(
-            message: _store.message,
-            onRetry: () => unawaited(_store.load()),
-            fallback: ConversationsScreen.failedFallback,
-          );
-        }
-        final conversations = _store.conversations;
-        if (conversations.isEmpty) {
-          return EmptyStateView(
-            title: ConversationsScreen.emptyTitle,
-            hint: ConversationsScreen.emptyHint,
-            actionLabel: 'Ver matches',
-            onAction: widget.onOpenMatches,
-          );
-        }
-        return ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FormMessage(message: _store.message),
-            ),
-            for (final conversation in conversations)
-              ConversationTile(
-                conversation: conversation,
-                onTap: () => unawaited(_openChat(conversation.matchId)),
-              ),
-          ],
+        return LoadStatusView(
+          failed: status == LoadStatus.failed,
+          message: _store.message,
+          fallback: ConversationsScreen.failedFallback,
+          onRetry: () => unawaited(_store.load()),
+          child: status == LoadStatus.loaded ? _buildList() : null,
         );
       },
+    );
+  }
+
+  Widget _buildList() {
+    final conversations = _store.conversations;
+    if (conversations.isEmpty) {
+      return EmptyStateView(
+        title: ConversationsScreen.emptyTitle,
+        hint: ConversationsScreen.emptyHint,
+        actionLabel: 'Ver matches',
+        onAction: widget.onOpenMatches,
+      );
+    }
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: FormMessage(message: _store.message),
+        ),
+        for (final conversation in conversations)
+          ConversationTile(
+            conversation: conversation,
+            onTap: () => unawaited(_openChat(conversation.matchId)),
+          ),
+      ],
     );
   }
 }

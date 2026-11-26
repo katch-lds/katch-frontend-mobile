@@ -1,4 +1,4 @@
-/// Ficheiro escolhido no dispositivo (modelo de classes, secção 3.4).
+/// Ficheiro escolhido no dispositivo.
 ///
 /// Fotografia ou curriculum vitae, com o nome, o caminho local (ou o conteúdo,
 /// nos testes), a dimensão e os primeiros bytes do conteúdo. É validado
@@ -44,12 +44,4 @@ final class FileSelection {
     final dot = name.lastIndexOf('.');
     return dot < 0 ? '' : name.substring(dot).toLowerCase();
   }
-
-  /// Tipo de conteúdo deduzido da extensão.
-  String get mimeType => switch (extension) {
-    '.jpg' || '.jpeg' => 'image/jpeg',
-    '.png' => 'image/png',
-    '.pdf' => 'application/pdf',
-    _ => 'application/octet-stream',
-  };
 }

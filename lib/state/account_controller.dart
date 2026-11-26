@@ -1,15 +1,14 @@
-import 'package:flutter/foundation.dart';
-
 import '../core/api_exception.dart';
 import '../services/auth_service.dart';
 import '../session/session_manager.dart';
+import 'safe_change_notifier.dart';
 
-/// Estado do ecrã «Conta», M20 (modelo de classes, 8.2).
+/// Estado do ecrã «Conta», M20.
 ///
 /// `signOut()` pede o fim de sessão ao servidor, sem depender do resultado, e
 /// termina a sessão local: o cliente descarta a credencial e passa a exigir
 /// novo início de sessão (RF105; API v02, 3.5).
-class AccountController extends ChangeNotifier {
+class AccountController extends SafeChangeNotifier {
   AccountController({
     required AuthService auth,
     required SessionManager session,
@@ -20,7 +19,6 @@ class AccountController extends ChangeNotifier {
   final SessionManager _session;
 
   bool _signingOut = false;
-  bool _disposed = false;
 
   bool get signingOut => _signingOut;
 
@@ -38,14 +36,6 @@ class AccountController extends ChangeNotifier {
     await _session.end();
     _signingOut = false;
     // O fim de sessão fecha o ecrã «Conta», que pode já ter destruído o estado.
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
+    notifyListeners();
   }
 }

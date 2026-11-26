@@ -1,6 +1,6 @@
 import '../models/api_error_dto.dart';
 
-/// Falha de um pedido à API (modelo de classes do mobile v02, secção 4.1).
+/// Falha de um pedido à API.
 sealed class ApiException implements Exception {
   const ApiException(this.message);
 

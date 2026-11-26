@@ -30,7 +30,12 @@ void main() {
   }
 
   FilledButton submitButton(WidgetTester tester) {
-    return tester.widget<FilledButton>(find.byKey(const Key('login-submit')));
+    return tester.widget<FilledButton>(
+      find.descendant(
+        of: find.byKey(const Key('login-submit')),
+        matching: find.byType(FilledButton),
+      ),
+    );
   }
 
   testWidgets('o botão «Entrar» só fica ativo com os dois campos', (

@@ -16,7 +16,7 @@ Future<void> pumpScreen(WidgetTester tester, TestApp app, Widget screen) async {
   await tester.pumpWidget(
     AppScope(
       dependencies: app.dependencies,
-      child: MaterialApp(home: screen),
+      child: MaterialApp(theme: katchTheme, home: screen),
     ),
   );
   await tester.pump();

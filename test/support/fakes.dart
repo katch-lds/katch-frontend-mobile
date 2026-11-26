@@ -92,7 +92,6 @@ class MemorySessionStorage implements SessionStorage {
 
   Session? saved;
   bool failRead = false;
-  int clears = 0;
 
   @override
   Future<Session?> read() async {
@@ -109,7 +108,6 @@ class MemorySessionStorage implements SessionStorage {
 
   @override
   Future<void> clear() async {
-    clears++;
     saved = null;
   }
 }
@@ -312,9 +310,13 @@ class FakeCandidateProfileService implements CandidateProfileService {
     return profile;
   }
 
+  /// Se existir, o `getProfile` só responde depois de ser completado.
+  Completer<void>? profileGate;
+
   @override
   Future<CandidateProfileDto> getProfile() async {
     await _call('getProfile');
+    await profileGate?.future;
     return profile;
   }
 

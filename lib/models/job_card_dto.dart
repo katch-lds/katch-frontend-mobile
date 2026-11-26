@@ -35,10 +35,7 @@ final class JobCardDto {
       contractType: ContractType.fromWire(json['contractType'] as String),
       workMode: WorkMode.fromWire(json['workMode'] as String),
       isUrgent: json['isUrgent'] as bool,
-      photoUrls: [
-        for (final url in json['photoUrls'] as List<Object?>? ?? const [])
-          url as String,
-      ],
+      photoUrls: readStrings(json['photoUrls']),
     );
   }
 

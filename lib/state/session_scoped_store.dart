@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../session/session_manager.dart';
 import '../session/session_status.dart';
 
-/// Base dos stores com dados do Candidato (modelo de classes, 8.1).
+/// Base dos stores com dados do Candidato.
 ///
 /// Observa o `SessionManager` e chama `reset()` quando a sessão deixa de estar
 /// iniciada, para que nenhum dado de uma conta fique em memória depois do fim

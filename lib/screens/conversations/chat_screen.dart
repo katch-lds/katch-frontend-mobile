@@ -6,13 +6,13 @@ import '../../app/app_scope.dart';
 import '../../models/conversation_summary_dto.dart';
 import '../../state/chat_controller.dart';
 import '../../state/load_status.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/conversation_widgets.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 
-/// Conversa com o Recrutador, M17, e o estado só de consulta, M18 (modelo de
-/// classes, 8.5 e 9.1; UC14; RF026, RF028 a RF030, RF070, RF075).
+/// Conversa com o Recrutador, M17, e o estado só de consulta, M18 (UC14;
+/// RF026, RF028 a RF030, RF070, RF075).
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, required this.matchId});
 
@@ -124,107 +124,92 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context, _) {
         final summary = _controller.summary;
         final loaded = _controller.status == LoadStatus.loaded;
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(summary?.companyName ?? 'Conversa'),
-            bottom: summary == null
-                ? null
-                : PreferredSize(
-                    preferredSize: const Size.fromHeight(24),
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        '${summary.jobTitle} · ${summary.counterpartName}',
-                      ),
+        return KatchScaffold(
+          title: summary?.companyName ?? 'Conversa',
+          bottom: summary == null
+              ? null
+              : PreferredSize(
+                  preferredSize: const Size.fromHeight(24),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '${summary.jobTitle} · ${summary.counterpartName}',
                     ),
                   ),
-            actions: [
-              if (loaded && !_controller.isReadOnly)
-                IconButton(
-                  key: const Key('chat-close'),
-                  tooltip: 'Encerrar conversa',
-                  onPressed: _controller.isClosing
-                      ? null
-                      : () => unawaited(_confirmClose()),
-                  icon: const Icon(Icons.block),
                 ),
-            ],
-          ),
-          // Faixa de falha de ligação: as consultas periódicas sem resposta
-          // ficam indicadas sem sair da conversa (RNF014).
-          body: Column(
-            children: [
-              ConnectionBanner(monitor: AppScope.of(context).monitor),
-              Expanded(child: _buildBody()),
-            ],
+          actions: [
+            if (loaded && !_controller.isReadOnly)
+              IconButton(
+                key: const Key('chat-close'),
+                tooltip: 'Encerrar conversa',
+                onPressed: _controller.isClosing
+                    ? null
+                    : () => unawaited(_confirmClose()),
+                icon: const Icon(Icons.block),
+              ),
+          ],
+          body: LoadStatusView(
+            failed: _controller.status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: ChatScreen.failedFallback,
+            onRetry: () => unawaited(_controller.open(widget.matchId)),
+            child: loaded ? _buildConversation() : null,
           ),
         );
       },
     );
   }
 
-  Widget _buildBody() {
-    switch (_controller.status) {
-      case LoadStatus.idle:
-      case LoadStatus.loading:
-        return const LoadStateView.loading();
-      case LoadStatus.failed:
-        return LoadStateView.failed(
-          message: _controller.errorMessage,
-          onRetry: () => unawaited(_controller.open(widget.matchId)),
-          fallback: ChatScreen.failedFallback,
-        );
-      case LoadStatus.loaded:
-        final messages = _controller.messages;
-        final readOnly = _controller.isReadOnly;
-        return Column(
-          children: [
-            Expanded(
-              child: messages.isEmpty
-                  ? const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Text(
-                          'Ainda não há mensagens nesta conversa.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: _scroll,
-                      padding: const EdgeInsets.all(12),
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) => MessageBubble(
-                        message: messages[index],
-                        isOwn: _controller.isOwn(messages[index]),
-                      ),
+  Widget _buildConversation() {
+    final messages = _controller.messages;
+    final readOnly = _controller.isReadOnly;
+    return Column(
+      children: [
+        Expanded(
+          child: messages.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Text(
+                      'Ainda não há mensagens nesta conversa.',
+                      textAlign: TextAlign.center,
                     ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: FormMessage(message: _controller.errorMessage),
-            ),
-            if (readOnly)
-              Container(
-                key: const Key('chat-read-only'),
-                width: double.infinity,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  '${ChatScreen.readOnlyText(_controller)} '
-                  '${ChatScreen.readOnlyHint}',
-                  textAlign: TextAlign.center,
+                  ),
+                )
+              : ListView.builder(
+                  controller: _scroll,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) => MessageBubble(
+                    message: messages[index],
+                    isOwn: _controller.isOwn(messages[index]),
+                  ),
                 ),
-              ),
-            MessageComposer(
-              controller: _draft,
-              enabled: !readOnly,
-              canSend: _controller.canSend,
-              onChanged: _controller.updateDraft,
-              onSend: () => unawaited(_controller.send()),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: FormMessage(message: _controller.errorMessage),
+        ),
+        if (readOnly)
+          Container(
+            key: const Key('chat-read-only'),
+            width: double.infinity,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              '${ChatScreen.readOnlyText(_controller)} '
+              '${ChatScreen.readOnlyHint}',
+              textAlign: TextAlign.center,
             ),
-          ],
-        );
-    }
+          ),
+        MessageComposer(
+          controller: _draft,
+          enabled: !readOnly,
+          canSend: _controller.canSend,
+          onChanged: _controller.updateDraft,
+          onSend: () => unawaited(_controller.send()),
+        ),
+      ],
+    );
   }
 }

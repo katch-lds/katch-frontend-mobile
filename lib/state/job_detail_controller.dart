@@ -1,13 +1,12 @@
-import 'package:flutter/foundation.dart';
-
 import '../core/api_exception.dart';
 import '../models/job_detail_dto.dart';
 import '../services/job_exploration_service.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
+import 'safe_change_notifier.dart';
 
-/// Estado de M12, detalhe da vaga (modelo de classes, 8.4; RF016).
-class JobDetailController extends ChangeNotifier {
+/// Estado de M12, detalhe da vaga (RF016).
+class JobDetailController extends SafeChangeNotifier {
   JobDetailController({required JobExplorationService service})
     : _service = service;
 
@@ -16,7 +15,6 @@ class JobDetailController extends ChangeNotifier {
   JobDetailDto? _detail;
   LoadStatus _status = LoadStatus.idle;
   String? _errorMessage;
-  bool _disposed = false;
 
   JobDetailDto? get detail => _detail;
 
@@ -28,7 +26,7 @@ class JobDetailController extends ChangeNotifier {
   Future<void> load(String jobId) async {
     _status = LoadStatus.loading;
     _errorMessage = null;
-    _notify();
+    notifyListeners();
     try {
       _detail = await _service.getDetail(jobId);
       _status = LoadStatus.loaded;
@@ -36,18 +34,6 @@ class JobDetailController extends ChangeNotifier {
       _status = LoadStatus.failed;
       _errorMessage = failureMessage(failure);
     }
-    _notify();
-  }
-
-  void _notify() {
-    if (!_disposed) {
-      notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    super.dispose();
+    notifyListeners();
   }
 }

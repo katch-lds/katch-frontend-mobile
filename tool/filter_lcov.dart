@@ -1,7 +1,13 @@
-// Retira do lcov.info os ficheiros excluídos da cobertura (I075; plano de
-// testes do frontend mobile, secção 10) e indica a cobertura de linhas.
-//
-//   dart run tool/filter_lcov.dart [coverage/lcov.info]
+/// Retira do lcov.info os ficheiros excluídos da cobertura (plano de testes do
+/// frontend mobile, secção 10) e indica a cobertura de linhas.
+///
+/// Argumentos: o caminho do lcov.info, por omissão `coverage/lcov.info`.
+///
+///     dart run tool/filter_lcov.dart [coverage/lcov.info]
+///
+/// Devolve o código de saída 0, ou 1 se o lcov.info não existir.
+library;
+
 import 'dart:io';
 
 import 'coverage_scope.dart';

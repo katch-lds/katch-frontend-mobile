@@ -6,10 +6,10 @@ import '../screens/conversations/conversations_screen.dart';
 import '../screens/exploration/exploration_screen.dart';
 import '../screens/matches/matches_screen.dart';
 import '../screens/profile/profile_screen.dart';
-import '../widgets/connection_banner.dart';
+import '../widgets/katch_scaffold.dart';
 import 'app_scope.dart';
 
-/// Área do Candidato, com a barra inferior de quatro separadores (9.1).
+/// Área do Candidato, com a barra inferior de quatro separadores.
 ///
 /// O separador «Explorar» mostra a exploração de vagas (M09 a M11); o
 /// separador «Matches», os matches e o contacto da Empresa (M14, M15); o
@@ -27,15 +27,19 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
-  static const _titles = ['Explorar', 'Matches', 'Conversas', 'Perfil'];
+  static const _tabs = [
+    (label: 'Explorar', icon: Icons.explore_outlined),
+    (label: 'Matches', icon: Icons.handshake_outlined),
+    (label: 'Conversas', icon: Icons.chat_bubble_outline),
+    (label: 'Perfil', icon: Icons.person_outline),
+  ];
   static const _matchesTab = 1;
   static const _conversationsTab = 2;
 
   @override
   void initState() {
     super.initState();
-    // Lista de conversas pedida ao entrar, para o contador do separador
-    // (secção 7, regra 7).
+    // Lista de conversas pedida ao entrar, para o contador do separador.
     unawaited(AppScope.of(context).conversations.load());
   }
 
@@ -46,35 +50,39 @@ class _HomeShellState extends State<HomeShell> {
     setState(() => _selectedIndex = index);
   }
 
+  Widget _icon(int index, int unread) {
+    final icon = Icon(_tabs[index].icon);
+    if (index != _conversationsTab) {
+      return icon;
+    }
+    return Badge(
+      key: const Key('tab-unread'),
+      isLabelVisible: unread > 0,
+      label: Text('$unread'),
+      child: icon,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final dependencies = AppScope.of(context);
-    final monitor = dependencies.monitor;
-    final conversations = dependencies.conversations;
-    return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex])),
-      body: Column(
+    final conversations = AppScope.of(context).conversations;
+    return KatchScaffold(
+      title: _tabs[_selectedIndex].label,
+      // Os separadores ficam montados: trocar de separador não descarta as
+      // edições por gravar do perfil (M05).
+      body: IndexedStack(
+        index: _selectedIndex,
         children: [
-          ConnectionBanner(monitor: monitor),
-          // Os separadores ficam montados: trocar de separador não descarta
-          // as edições por gravar do perfil (M05).
-          Expanded(
-            child: IndexedStack(
-              index: _selectedIndex,
-              children: [
-                const ExplorationScreen(),
-                MatchesScreen(
-                  active: _selectedIndex == _matchesTab,
-                  onExplore: () => _select(0),
-                ),
-                ConversationsScreen(
-                  active: _selectedIndex == _conversationsTab,
-                  onOpenMatches: () => _select(_matchesTab),
-                ),
-                const ProfileScreen(),
-              ],
-            ),
+          const ExplorationScreen(),
+          MatchesScreen(
+            active: _selectedIndex == _matchesTab,
+            onExplore: () => _select(0),
           ),
+          ConversationsScreen(
+            active: _selectedIndex == _conversationsTab,
+            onOpenMatches: () => _select(_matchesTab),
+          ),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: ListenableBuilder(
@@ -85,27 +93,11 @@ class _HomeShellState extends State<HomeShell> {
             selectedIndex: _selectedIndex,
             onDestinationSelected: _select,
             destinations: [
-              const NavigationDestination(
-                icon: Icon(Icons.explore_outlined),
-                label: 'Explorar',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.handshake_outlined),
-                label: 'Matches',
-              ),
-              NavigationDestination(
-                icon: Badge(
-                  key: const Key('tab-unread'),
-                  isLabelVisible: unread > 0,
-                  label: Text('$unread'),
-                  child: const Icon(Icons.chat_bubble_outline),
+              for (var index = 0; index < _tabs.length; index++)
+                NavigationDestination(
+                  icon: _icon(index, unread),
+                  label: _tabs[index].label,
                 ),
-                label: 'Conversas',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                label: 'Perfil',
-              ),
             ],
           );
         },

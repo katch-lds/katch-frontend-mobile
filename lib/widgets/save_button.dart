@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
-/// Botão de gravação, com o indicador de progresso durante o pedido.
+/// Botão de envio de um formulário, com o indicador de progresso durante o
+/// pedido.
 class SaveButton extends StatelessWidget {
   const SaveButton({
     super.key,
@@ -10,7 +11,9 @@ class SaveButton extends StatelessWidget {
   });
 
   final bool loading;
-  final VoidCallback onPressed;
+
+  /// `null` desativa o botão.
+  final VoidCallback? onPressed;
   final String label;
 
   @override

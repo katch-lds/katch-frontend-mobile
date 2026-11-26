@@ -5,11 +5,13 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:katch_mobile/app/app_config.dart';
 import 'package:katch_mobile/core/api_exception.dart';
 import 'package:katch_mobile/core/connection_monitor.dart';
 import 'package:katch_mobile/core/http_api_client.dart';
 import 'package:katch_mobile/models/file_selection.dart';
 import 'package:katch_mobile/session/session_manager.dart';
+import 'package:katch_mobile/session/session_status.dart';
 
 import '../support/fakes.dart';
 
@@ -29,8 +31,9 @@ void main() {
 
   HttpApiClient clientFor(http.Response Function(http.Request) handler) {
     return HttpApiClient(
-      baseUrl: 'https://api.test/',
+      baseUrl: 'https://api.test',
       requestTimeout: const Duration(milliseconds: 100),
+      uploadTimeout: AppConfig.defaultUploadTimeout,
       credentials: session,
       monitor: monitor,
       client: MockClient((request) async {
@@ -88,7 +91,7 @@ void main() {
     }
 
     expect(rejection?.error.code, 'ERR-30');
-    expect(session.isAuthenticated, isTrue);
+    expect(session.status, SessionStatus.signedIn);
   });
 
   test('termina a sessão quando a credencial é recusada', () async {
@@ -98,7 +101,7 @@ void main() {
     final call = client.get('/api/candidate/profile');
 
     await expectLater(call, throwsA(isA<AuthenticationFailure>()));
-    expect(session.isAuthenticated, isFalse);
+    expect(session.status, isNot(SessionStatus.signedIn));
   });
 
   test('no início de sessão, a recusa chega como ApiRejection', () async {
@@ -117,10 +120,24 @@ void main() {
     await expectLater(call, throwsA(isA<UnexpectedFailure>()));
   });
 
+  test('resposta 2xx com corpo que não é JSON é UnexpectedFailure', () async {
+    final client = clientFor((_) => http.Response('<html>proxy</html>', 200));
+
+    final call = client.get('/api/x');
+
+    await expectLater(
+      call,
+      throwsA(
+        isA<UnexpectedFailure>().having((e) => e.statusCode, 'statusCode', 200),
+      ),
+    );
+  });
+
   test('sem resposta no tempo limite, regista a falha de ligação', () async {
     final client = HttpApiClient(
       baseUrl: 'https://api.test',
       requestTimeout: const Duration(milliseconds: 10),
+      uploadTimeout: AppConfig.defaultUploadTimeout,
       credentials: session,
       monitor: monitor,
       client: MockClient((_) => Completer<http.Response>().future),
@@ -139,6 +156,7 @@ void main() {
       final client = HttpApiClient(
         baseUrl: 'https://api.test',
         requestTimeout: const Duration(milliseconds: 20),
+        uploadTimeout: AppConfig.defaultUploadTimeout,
         credentials: session,
         monitor: monitor,
         client: _RecordingClient(
@@ -159,10 +177,6 @@ void main() {
   );
 
   test('o envio de ficheiros tem um tempo limite próprio', () async {
-    expect(
-      HttpApiClient.defaultUploadTimeout,
-      greaterThan(const Duration(seconds: 9)),
-    );
     Future<http.StreamedResponse> slow(http.BaseRequest request) async {
       await request.finalize().drain<void>();
       await Future<void>.delayed(const Duration(milliseconds: 60));
@@ -191,6 +205,7 @@ void main() {
     final client = HttpApiClient(
       baseUrl: 'https://api.test',
       requestTimeout: const Duration(milliseconds: 10),
+      uploadTimeout: AppConfig.defaultUploadTimeout,
       credentials: session,
       monitor: monitor,
       log: messages.add,
@@ -228,6 +243,7 @@ void main() {
       return HttpApiClient(
         baseUrl: 'https://api.test',
         requestTimeout: const Duration(seconds: 1),
+        uploadTimeout: AppConfig.defaultUploadTimeout,
         credentials: session,
         monitor: monitor,
         client: _RecordingClient((request, body0) {

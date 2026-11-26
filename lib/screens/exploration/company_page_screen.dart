@@ -6,13 +6,13 @@ import '../../app/app_scope.dart';
 import '../../models/company_page_dto.dart';
 import '../../state/company_page_controller.dart';
 import '../../state/load_status.dart';
-import '../../widgets/connection_banner.dart';
 import '../../widgets/form_message.dart';
+import '../../widgets/katch_scaffold.dart';
 import '../../widgets/load_state_view.dart';
 import '../../widgets/photo_grid.dart';
 import '../../widgets/remote_image.dart';
 
-/// Página de apresentação da Empresa, M13 (modelo de classes, 9.3; RF017).
+/// Página de apresentação da Empresa, M13 (RF017).
 ///
 /// Designação, logótipo, descrição, sítio na Internet e galeria. Os contactos
 /// da Empresa só são dados depois do match (RF025).
@@ -50,39 +50,25 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final monitor = AppScope.of(context).monitor;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Empresa')),
-      body: Column(
-        children: [
-          ConnectionBanner(monitor: monitor),
-          Expanded(
-            child: ListenableBuilder(
-              listenable: _controller,
-              builder: (context, _) {
-                final page = _controller.page;
-                if (_controller.status == LoadStatus.failed) {
-                  return LoadStateView.failed(
-                    message: _controller.errorMessage,
-                    onRetry: () =>
-                        unawaited(_controller.load(widget.companyId)),
-                    fallback: CompanyPageScreen.failedFallback,
-                  );
-                }
-                if (page == null) {
-                  return const LoadStateView.loading();
-                }
-                return _buildPage(context, page);
-              },
-            ),
-          ),
-        ],
+    return KatchScaffold(
+      title: 'Empresa',
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final page = _controller.page;
+          return LoadStatusView(
+            failed: _controller.status == LoadStatus.failed,
+            message: _controller.errorMessage,
+            fallback: CompanyPageScreen.failedFallback,
+            onRetry: () => unawaited(_controller.load(widget.companyId)),
+            child: page == null ? null : _buildPage(context, page),
+          );
+        },
       ),
     );
   }
 
   Widget _buildPage(BuildContext context, CompanyPageDto page) {
-    final dependencies = AppScope.of(context);
     final textTheme = Theme.of(context).textTheme;
     final website = page.website;
     return SingleChildScrollView(
@@ -93,11 +79,7 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
         children: [
           Row(
             children: [
-              RemoteImage(
-                url: page.logoUrl,
-                baseUrl: dependencies.config.apiBaseUrl,
-                credentials: dependencies.session,
-              ),
+              RemoteImage(url: page.logoUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(page.companyName, style: textTheme.titleLarge),
@@ -126,11 +108,7 @@ class _CompanyPageScreenState extends State<CompanyPageScreen> {
             const SizedBox(height: 16),
             Text('Galeria', style: textTheme.titleMedium),
             const SizedBox(height: 8),
-            PhotoGrid(
-              urls: page.photoUrls,
-              baseUrl: dependencies.config.apiBaseUrl,
-              credentials: dependencies.session,
-            ),
+            PhotoGrid(urls: page.photoUrls),
           ],
         ],
       ),

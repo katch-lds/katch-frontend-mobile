@@ -6,8 +6,7 @@ import '../models/message_dto.dart';
 import 'job_formats.dart';
 
 /// Linha de uma conversa da lista M16, com a Empresa, a vaga, o contador de
-/// mensagens por ler e a indicação de conversa encerrada (modelo de classes,
-/// 9.4; RF027, RF075).
+/// mensagens por ler e a indicação de conversa encerrada (RF027, RF075).
 class ConversationTile extends StatelessWidget {
   const ConversationTile({
     super.key,
@@ -52,8 +51,7 @@ class ConversationTile extends StatelessWidget {
 }
 
 /// Mensagem do histórico, alinhada pelo remetente, com a data e a hora e, nas
-/// mensagens do Candidato, a indicação de leitura (modelo de classes, 9.4;
-/// RF028).
+/// mensagens do Candidato, a indicação de leitura (RF028).
 class MessageBubble extends StatelessWidget {
   const MessageBubble({super.key, required this.message, required this.isOwn});
 
@@ -117,7 +115,7 @@ class MessageBubble extends StatelessWidget {
 }
 
 /// Caixa de escrita com o contador «n/1000» e o botão «Enviar»; desativada
-/// quando a conversa é só de consulta (modelo de classes, 9.4; RF026, RF075).
+/// quando a conversa é só de consulta (RF026, RF075).
 class MessageComposer extends StatelessWidget {
   const MessageComposer({
     super.key,
@@ -152,7 +150,6 @@ class MessageComposer extends StatelessWidget {
               maxLength: InputRules.maxMessageLength,
               decoration: const InputDecoration(
                 hintText: 'Escreva uma mensagem',
-                border: OutlineInputBorder(),
               ),
             ),
           ),

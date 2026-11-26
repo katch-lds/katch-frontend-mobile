@@ -7,7 +7,7 @@ import '../session/session_manager.dart';
 import 'failure_messages.dart';
 import 'load_status.dart';
 
-/// Estado do ecrã de início de sessão, M01 (modelo de classes, 8.2).
+/// Estado do ecrã de início de sessão, M01.
 ///
 /// Quando o servidor rejeita o início de sessão, mostra a `message` do
 /// `ApiErrorDto` sem a alterar: ERR-02 (a mesma para correio inexistente e

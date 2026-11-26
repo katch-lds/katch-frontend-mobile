@@ -4,7 +4,7 @@ Aplicação móvel do Katch, para o Candidato. Flutter e Dart (I120).
 
 ## Requisitos
 
-- Flutter SDK (canal stable) com Dart 3.8 ou posterior.
+- Flutter 3.47 ou posterior, com Dart 3.13 ou posterior (o `material_ui` só existe desde o Flutter 3.47).
 - API do `katch-backend` em execução (por omissão, `http://10.0.2.2:5180`, a API local vista do emulador Android).
 
 ## Comandos
@@ -55,6 +55,27 @@ Android (`file_selector`) e enviados em `multipart/form-data`, no campo `file`. 
 os caminhos `/api/files/...` da própria API. Os separadores da área do Candidato ficam montados, para que trocar de
 separador não descarte as edições do perfil por gravar.
 
+## Exploração de vagas
+
+O separador «Explorar» (M09) mostra um cartão de vaga de cada vez, escolhido pelo servidor segundo as preferências de
+procura do Candidato, com a distância calculada pela API. Recusar e manifestar interesse fazem-se com os botões do
+cartão ou deslizando-o para a esquerda ou para a direita. Recusar não consome a quota; cada interesse gasta um dos 10
+disponíveis. Com a quota esgotada (M10), o cartão fica visível, só a recusa e o detalhe continuam ativos e a aplicação
+conta o tempo até ao fim do bloqueio, altura em que volta a pedir a quota. Sem vagas compatíveis (M11), sugere ajustar
+as preferências, que também se abrem a partir da exploração (M08). Os cartões são pedidos de novo quando as
+preferências mudam e quando a aplicação regressa ao primeiro plano. O detalhe da vaga (M12) dá acesso à página de
+apresentação da Empresa (M13), cujo sítio na Internet abre no navegador (só endereços `http` e `https`).
+
+## Matches e conversas
+
+O separador «Matches» (M14) lista os matches do Candidato, do mais recente para o mais antigo, e indica quando a vaga já
+não está publicada. Cada match abre o contacto da Empresa (M15), cujo correio eletrónico e telefone abrem nas
+aplicações do dispositivo, e a conversa. O separador «Conversas» (M16) lista as conversas com o total de mensagens por
+ler, também no ícone do separador. Na conversa (M17), o histórico completo é pedido ao abrir e as mensagens novas são
+consultadas de 3 em 3 segundos, só com a aplicação em primeiro plano. O Candidato pode enviar mensagens de 1 a 1000
+caracteres e encerrar a conversa; depois de encerrada, ou se a conta da Empresa for suspensa, fica só de consulta
+(M18).
+
 ## Estrutura
 
 As pastas de `lib/` seguem as camadas do modelo de classes do frontend mobile v02 (secção 2.3): `app`, `core`
@@ -63,5 +84,11 @@ As pastas de `lib/` seguem as camadas do modelo de classes do frontend mobile v0
 ## Pipeline CI
 
 `.github/workflows/ci.yml`: `build-and-test` (testes com cobertura mínima de 40%, QG-01 com o APK de depuração e o
-QG-07 preparado) e `static-analysis` (QG-05: `dart format` e `flutter analyze`). A plataforma Android
-(`android/`) está no repositório.
+QG-07 preparado) e `static-analysis` (QG-05: `dart format` e `flutter analyze`), ambos com o Flutter 3.47.x. A
+plataforma Android (`android/`) está no repositório.
+
+## Android
+
+O `release` ainda não tem chave de assinatura própria e assina com a chave de depuração (`android/app/build.gradle.kts`).
+A cópia de segurança automática do Android está desativada (`android:allowBackup="false"`): a credencial guardada não é
+copiada para outro dispositivo, onde não poderia ser lida.
