@@ -82,9 +82,20 @@ class TestApp {
   /// Escolhe uma opção de um `DropdownField`.
   Future<void> choose(WidgetTester tester, String key, String option) async {
     await tapKey(tester, key);
+    await tester.pump(const Duration(milliseconds: 500));
+    // O menu só constrói as opções visíveis: desloca-o até à opção pedida (por
+    // exemplo, «Outro», a última da lista de competências).
+    final options = find.text(option);
+    if (options.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        options,
+        300,
+        scrollable: find.byType(Scrollable).last,
+        maxScrolls: 100,
+      );
+    }
     // O menu aberto fica por cima: a opção é a última com o texto. Espera-se
     // primeiro por alguma, porque `.last` sem elementos lança uma exceção.
-    final options = find.text(option);
     await waitFor(tester, options);
     await tap(tester, options.last);
     await tester.pump(const Duration(milliseconds: 300));

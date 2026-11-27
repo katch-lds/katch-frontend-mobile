@@ -468,7 +468,9 @@ Object? _check(http.Response response, String what) {
 /// vaga que cria seja o primeiro cartão do seu Candidato.
 abstract final class Locations {
   static const braganca = '95403bb6-dfd8-5ec9-b7be-cca706c28d46';
-  static const bragancaName = 'Bragança';
+
+  /// Nome apresentado pela API (localidade e distrito).
+  static const bragancaName = 'Bragança (Bragança)';
 
   /// Cerca de 80 km de Bragança: fora de uma distância máxima de 50 km.
   static const vilaReal = 'd85fd474-2dd2-5c5d-8838-0e1bfaa15906';
