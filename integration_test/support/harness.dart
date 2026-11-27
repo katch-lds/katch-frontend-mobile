@@ -82,7 +82,11 @@ class TestApp {
   /// Escolhe uma opção de um `DropdownField`.
   Future<void> choose(WidgetTester tester, String key, String option) async {
     await tapKey(tester, key);
-    await tap(tester, find.text(option).last);
+    // O menu aberto fica por cima: a opção é a última com o texto. Espera-se
+    // primeiro por alguma, porque `.last` sem elementos lança uma exceção.
+    final options = find.text(option);
+    await waitFor(tester, options);
+    await tap(tester, options.last);
     await tester.pump(const Duration(milliseconds: 300));
   }
 
@@ -153,15 +157,27 @@ Future<void> waitForFinder(
   tester,
   () => finder.evaluate().isNotEmpty,
   timeout: timeout,
-  what: finder.toString(),
+  what: () => _describe(finder),
 );
 
+String _describe(Finder finder) {
+  try {
+    return finder.toString();
+  } on StateError {
+    // `find.…().last` sem elementos: a descrição também falha.
+    return 'o último de ${finder.runtimeType}';
+  }
+}
+
 /// Avança os fotogramas até a condição se verificar.
+///
+/// A descrição (`what`) só é calculada se o tempo se esgotar: a de um finder
+/// como `find.text(…).last` falha enquanto não houver nenhum elemento.
 Future<void> waitUntil(
   WidgetTester tester,
   bool Function() condition, {
   Duration timeout = apiWait,
-  required String what,
+  required Object what,
 }) async {
   final end = DateTime.now().add(timeout);
   while (true) {
@@ -170,7 +186,8 @@ Future<void> waitUntil(
       return;
     }
     if (DateTime.now().isAfter(end)) {
-      fail('Passaram ${timeout.inSeconds} s sem: $what');
+      final description = what is String Function() ? what() : '$what';
+      fail('Passaram ${timeout.inSeconds} s sem: $description');
     }
   }
 }

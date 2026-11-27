@@ -47,8 +47,24 @@ void exploracaoScenarios() {
       expect(_inCard(find.text(recruiter.companyName)), findsOneWidget);
       await app.waitFor(tester, _inCard(find.byKey(const Key('remote-image'))));
       expect(_inCard(find.text(salaryRange(1400, 2000))), findsOneWidget);
+      final shownCard = app.client.cards.lastWhere(
+        (card) => card['jobId'] == eligible.jobId,
+      );
       expect(
-        _inCard(find.text(locationAndDistance(Locations.bragancaName, 0))),
+        shownCard['locationName'],
+        Locations.bragancaName,
+        reason: '$shownCard',
+      );
+      expect(shownCard['distanceKm'], 0, reason: '$shownCard');
+      expect(
+        _inCard(
+          find.text(
+            locationAndDistance(
+              shownCard['locationName'] as String,
+              shownCard['distanceKm'] as int,
+            ),
+          ),
+        ),
         findsOneWidget,
       );
       expect(_inCard(find.text('Sem termo')), findsOneWidget);
