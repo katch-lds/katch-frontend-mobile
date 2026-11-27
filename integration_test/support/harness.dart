@@ -62,6 +62,13 @@ class TestApp {
     await waitFor(tester, finder);
     await tester.ensureVisible(finder.first);
     await tester.pump();
+    // Espera que o elemento receba o toque: durante a transição de um ecrã ou
+    // a animação do teclado, o ponto do toque pode cair noutro elemento.
+    final end = DateTime.now().add(const Duration(seconds: 5));
+    while (finder.first.hitTestable().evaluate().isEmpty &&
+        DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     await tester.tap(finder.first);
     interactions++;
     await tester.pump();
