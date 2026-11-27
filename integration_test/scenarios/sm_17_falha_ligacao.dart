@@ -26,7 +26,9 @@ void falhaLigacaoScenarios() {
       stopwatch.stop();
       expect(
         stopwatch.elapsed,
-        lessThanOrEqualTo(const Duration(seconds: 10)),
+        // Bloqueio do QG-07 (I080): limite impossível, para o teste falhar de
+        // propósito nesta branch de teste. Não integrar.
+        lessThanOrEqualTo(const Duration(milliseconds: 1)),
         reason: '${stopwatch.elapsedMilliseconds} ms (RNF014)',
       );
       expect(find.byType(NavigationBar), findsNothing);
