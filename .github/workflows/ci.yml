@@ -2,8 +2,8 @@ name: CI
 
 # Pipeline CI do frontend mobile (I120), no modelo da pipeline do backend (I066): QG-01 (flutter build), QG-05
 # (dart format e Dart analyzer com flutter_lints, com infos e avisos tratados como erro) e a cobertura mínima de 40%
-# das linhas dos testes unitários e de widget (flutter test). O passo do QG-07 (integration_test) fica preparado e
-# corre logo que exista um teste em integration_test/.
+# das linhas dos testes unitários e de widget (flutter test) e QG-07 (testes de sistema integration_test, I080) num
+# emulador Android, contra a API do katch-backend e o PostgreSQL com os dados de demonstração.
 # O QG-05 do mobile não inclui o SonarQube: o SonarQube Community Build não analisa Dart, e o grupo decidiu em
 # 2026-11-05 (I120) usar o Dart analyzer e o dart format como QG-05 do mobile, a registar como limitação.
 # Corre em cada Merge Request para a main e em cada push na main; a regra de proteção da main exige os dois jobs com
@@ -32,7 +32,19 @@ jobs:
   build-and-test:
     name: build-and-test
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 75
+    services:
+      # Base de dados da API usada pelos testes de sistema (QG-07), com locale UTF-8 (database/README.md do backend).
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: katch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v4
 
@@ -92,13 +104,118 @@ jobs:
       - name: QG-01 Build (APK de depuração)
         run: flutter build apk --debug --dart-define=API_BASE_URL="${API_BASE_URL}"
 
+      # QG-07 — testes de sistema (I080; plano de testes do frontend mobile, secção 5). A API corre a partir do
+      # katch-backend (versão fixa abaixo), sobre a base criada pelos scripts 01 a 03 (esquema, listas e dados de
+      # demonstração). O emulador chega à API do anfitrião por http://10.0.2.2:5180.
+      - name: QG-07 Obter o katch-backend
+        uses: actions/checkout@v4
+        with:
+          repository: katch-lds/katch-backend
+          # Versão fixa do backend (main da I136, 796f81e), para uma alteração no backend não partir esta pipeline sem
+          # alterações neste repositório. Para testar outra versão, definir a variável do repositório KATCH_BACKEND_REF.
+          ref: ${{ vars.KATCH_BACKEND_REF || '796f81e99ef9d955eab4d27095443accf821f171' }}
+          path: katch-backend
+          token: ${{ secrets.KATCH_BACKEND_TOKEN || github.token }}
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: QG-07 Base de dados com os dados de demonstração
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          for script in 01-create-schema 02-seed-reference-data 03-seed-demo-data; do
+            # -v demo=1: o script 03 só aceita correr numa base de desenvolvimento ou de demonstração.
+            psql -d katch -v ON_ERROR_STOP=1 -v demo=1 -q -f "katch-backend/database/${script}.sql"
+          done
+
+      # A palavra-passe do Administrador é gerada em cada execução (plano de testes, secção 5), nunca fica no
+      # repositório nem nos registos (máscara), e o Administrador recebe o resumo correspondente (formato V3 do
+      # ASP.NET Core Identity: PBKDF2-HMAC-SHA512, 100 000 iterações, sal de 16 bytes).
+      - name: QG-07 Palavra-passe do Administrador
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          password="Qg07$(openssl rand -hex 8)a1"
+          echo "::add-mask::${password}"
+          echo "E2E_ADMIN_PASSWORD=${password}" >> "$GITHUB_ENV"
+          E2E_ADMIN_PASSWORD="${password}" python3 - > admin-password.sql <<'PY'
+          import base64, hashlib, os, struct
+
+          def identity_v3(password: str) -> str:
+              salt = os.urandom(16)
+              subkey = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100_000, 32)
+              header = b'\x01' + struct.pack('>III', 2, 100_000, len(salt))
+              return base64.b64encode(header + salt + subkey).decode('ascii')
+
+          admin = identity_v3(os.environ['E2E_ADMIN_PASSWORD'])
+          print(f"UPDATE app_user SET password_hash = '{admin}' WHERE email = 'admin@katch.pt';")
+          PY
+          psql -d katch -v ON_ERROR_STOP=1 -q -f admin-password.sql
+          rm admin-password.sql
+
+      - name: QG-07 Arrancar a API
+        env:
+          ConnectionStrings__Katch: Host=localhost;Port=5432;Database=katch;Username=postgres;Password=postgres
+          # Os cenários criam contas e iniciam sessão a partir do mesmo IP em poucos minutos: os limites por IP da API
+          # (Limits, por omissão 10 por minuto) são alargados só nesta instância de teste (ERR-14 da I136).
+          Limits__LoginPermitLimit: "1000"
+          Limits__RegistrationPermitLimit: "1000"
+          Limits__LocationsPermitLimit: "1000"
+          Limits__UserPermitLimit: "10000"
+        run: |
+          export Jwt__Secret="$(openssl rand -hex 32)"
+          nohup dotnet run --project katch-backend/src/Katch.Backend --launch-profile http > api.log 2>&1 &
+          for i in $(seq 1 90); do
+            if curl -s -o /dev/null http://localhost:5180/swagger/index.html; then echo "API pronta"; exit 0; fi
+            sleep 2
+          done
+          cat api.log
+          exit 1
+
+      # O emulador x86_64 precisa de aceleração por KVM no executor do GitHub.
+      - name: QG-07 Ativar o KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: QG-07 Testes de sistema (integration_test)
-        if: hashFiles('integration_test/**/*_test.dart') != ''
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: x86_64
-          script: flutter test integration_test
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: flutter test integration_test --dart-define=API_BASE_URL=http://10.0.2.2:5180 --dart-define=E2E_ADMIN_PASSWORD="${E2E_ADMIN_PASSWORD}" --file-reporter json:integration-test-report.json
+
+      - name: Resumo dos testes de sistema
+        if: always()
+        run: |
+          if [[ -f integration-test-report.json ]]; then
+            passed="$(jq -s '[.[] | select(.type == "testDone" and .hidden == false and .result == "success")] | length' integration-test-report.json)"
+            failed="$(jq -s '[.[] | select(.type == "testDone" and .hidden == false and .result != "success")] | length' integration-test-report.json)"
+            {
+              echo "## Testes de sistema (integration_test, QG-07)"
+              echo
+              echo "Passaram: **${passed}**; falharam: **${failed}**"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publicar relatório dos testes de sistema
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-report
+          path: |
+            integration-test-report.json
+            api.log
+          if-no-files-found: ignore
 
   static-analysis:
     name: static-analysis
@@ -118,7 +235,7 @@ jobs:
         run: flutter pub get
 
       - name: QG-05 Formatação (dart format)
-        run: dart format --output=none --set-exit-if-changed lib test tool
+        run: dart format --output=none --set-exit-if-changed lib test tool integration_test
 
       - name: QG-05 Análise estática (Dart analyzer com flutter_lints)
         run: flutter analyze --fatal-infos --fatal-warnings
