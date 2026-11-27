@@ -27,3 +27,12 @@ cenários criam os seus próprios Candidatos, Recrutadores, Empresas e vagas, co
 um sufixo único, por isso a execução repete-se sem repor a base. Com muitas
 execuções seguidas, os limites de pedidos por IP da API (`Limits__*`) podem ter
 de ser alargados, como na pipeline.
+
+Os tempos do SM-16 e do SM-17 contam a partir do toque e aparecem sempre na
+saída, passe ou falhe o teste (`SM-16a job-decline: … ms (limite 2000 ms)`,
+`SM-17a: … ms (limite 10000 ms)`).
+
+Desvios ao plano de testes (secção 4.3, 5 e 6), justificados na especificação
+(secção 2.1): o armazenamento da sessão é substituído por um em memória, os
+Candidatos (exceto no SM-01) e os Recrutadores são criados pela API e o
+`katch-backend` é usado na versão fixa `796f81e`.

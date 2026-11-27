@@ -59,6 +59,25 @@ class TestApp {
   }) => waitForFinder(tester, finder, timeout: timeout);
 
   Future<void> tap(WidgetTester tester, Finder finder) async {
+    await _readyToTap(tester, finder);
+    await tester.tap(finder.first);
+    interactions++;
+    await tester.pump();
+  }
+
+  /// Toca no elemento e devolve um cronómetro iniciado no instante do toque,
+  /// depois de o elemento estar pronto a recebê-lo (RNF002, RNF014).
+  Future<Stopwatch> tapKeyTimed(WidgetTester tester, String key) async {
+    final finder = find.byKey(Key(key));
+    await _readyToTap(tester, finder);
+    final stopwatch = Stopwatch()..start();
+    await tester.tap(finder.first);
+    interactions++;
+    await tester.pump();
+    return stopwatch;
+  }
+
+  Future<void> _readyToTap(WidgetTester tester, Finder finder) async {
     await waitFor(tester, finder);
     await tester.ensureVisible(finder.first);
     await tester.pump();
@@ -69,9 +88,6 @@ class TestApp {
         DateTime.now().isBefore(end)) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-    await tester.tap(finder.first);
-    interactions++;
-    await tester.pump();
   }
 
   Future<void> tapKey(WidgetTester tester, String key) =>
@@ -165,6 +181,17 @@ class TestApp {
     }, what: 'cartão seguinte');
     return currentCardId(tester)!;
   }
+}
+
+/// Escreve um tempo medido na saída do teste, passe ou falhe, para se ver a
+/// folga em relação ao limite (na saída do `flutter test` e, como evento
+/// `print`, no relatório JSON).
+void reportTime(String what, Duration elapsed, Duration limit) {
+  // ignore: avoid_print
+  print(
+    '$what: ${elapsed.inMilliseconds} ms '
+    '(limite ${limit.inMilliseconds} ms)',
+  );
 }
 
 Future<void> waitForFinder(

@@ -16,17 +16,22 @@ void falhaLigacaoScenarios() {
       final app = await TestApp.start(tester, apiBaseUrl: _silentApi);
       await app.waitFor(tester, find.byKey(const Key('login-email')));
 
-      final stopwatch = Stopwatch()..start();
-      await app.login(tester, 'sem.resposta@teste.katch.pt', 'Teste123a');
+      await app.enter(tester, 'login-email', 'sem.resposta@teste.katch.pt');
+      await app.enter(tester, 'login-password', 'Teste123a');
+
+      // O tempo conta a partir do toque em «Entrar» (RNF014).
+      const limit = Duration(seconds: 10);
+      final stopwatch = await app.tapKeyTimed(tester, 'login-submit');
       await app.waitFor(
         tester,
         find.text(connectionFailureMessage),
         timeout: const Duration(seconds: 15),
       );
       stopwatch.stop();
+      reportTime('SM-17a', stopwatch.elapsed, limit);
       expect(
         stopwatch.elapsed,
-        lessThanOrEqualTo(const Duration(seconds: 10)),
+        lessThanOrEqualTo(limit),
         reason: '${stopwatch.elapsedMilliseconds} ms (RNF014)',
       );
       expect(find.byType(NavigationBar), findsNothing);

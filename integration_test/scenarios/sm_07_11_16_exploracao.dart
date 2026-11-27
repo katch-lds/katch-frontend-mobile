@@ -238,7 +238,8 @@ void exploracaoScenarios() {
         '/api/candidate/jobs/${app.currentCardId(tester)}/interest',
         null,
       );
-      expect(blocked.status, greaterThanOrEqualTo(400));
+      expect(blocked.status, 409);
+      expect(blocked.code, 'ERR-31');
 
       // A recusa continua disponível (RF022).
       final id = app.currentCardId(tester);
@@ -294,14 +295,15 @@ void exploracaoScenarios() {
         for (final job in jobs) job.jobId,
       });
 
+      const limit = Duration(seconds: 2);
       for (final action in ['job-decline', 'job-interest']) {
-        final stopwatch = Stopwatch()..start();
-        await app.tapKey(tester, action);
+        final stopwatch = await app.tapKeyTimed(tester, action);
         current = await app.waitForNextCard(tester, current);
         stopwatch.stop();
+        reportTime('SM-16a $action', stopwatch.elapsed, limit);
         expect(
           stopwatch.elapsed,
-          lessThanOrEqualTo(const Duration(seconds: 2)),
+          lessThanOrEqualTo(limit),
           reason: '$action: ${stopwatch.elapsedMilliseconds} ms (RNF002)',
         );
       }
